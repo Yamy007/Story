@@ -15,6 +15,9 @@ class Genre(models.Model):
             "id":self.id,
             "genre": self.genre,
         }
+    
+    class Meta:
+        ordering = ['id'] 
         
 class Story(models.Model):
     user_id = models.IntegerField(default=None)
@@ -40,7 +43,10 @@ class Story(models.Model):
             "date": self.date,
             "genres": [genre.genre for genre in self.genres.all()]
         }
-    
+        
+    class Meta:
+        ordering = ['-date']
+        
 class Comments(models.Model):
     user_id = models.IntegerField(default=None)
     comment_body = models.CharField(max_length=1000)
@@ -59,3 +65,6 @@ class Comments(models.Model):
             "comment_body": self.comment_body,
             "story": self.story,
         }
+    
+    class Meta:
+        ordering = ['user_id']
