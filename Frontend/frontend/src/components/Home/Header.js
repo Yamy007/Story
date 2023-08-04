@@ -12,8 +12,10 @@ import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import MenuItem from '@mui/material/MenuItem'
 import { FormControlLabel, Switch } from '@mui/material'
-const pages = ['Products', 'Pricing', 'Blog']
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout']
+import { Link, useLocation } from 'react-router-dom'
+
+const pages = ['Home', 'Story', 'Blog']
+const settings = ['Settings', 'Logout']
 
 export const Header = ({ isDark, setIsDark }) => {
 	const [anchorElNav, setAnchorElNav] = React.useState(null)
@@ -33,7 +35,8 @@ export const Header = ({ isDark, setIsDark }) => {
 	const handleCloseUserMenu = () => {
 		setAnchorElUser(null)
 	}
-
+	let path = useLocation().pathname
+	console.log('path', path)
 	return (
 		<AppBar position='static'>
 			<Container maxWidth='xl'>
@@ -112,18 +115,24 @@ export const Header = ({ isDark, setIsDark }) => {
 					</Typography>
 					<Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
 						{pages.map(page => (
-							<Button
+							<Link
 								key={page}
-								onClick={handleCloseNavMenu}
-								sx={{ my: 2, color: 'white', display: 'block' }}
+								to={page === 'Home' ? '/' : page}
+								style={{ textDecoration: 'none' }}
 							>
-								{page}
-							</Button>
+								<Button
+									onClick={handleCloseNavMenu}
+									sx={{ my: 2, color: 'white', display: 'block' }}
+								>
+									{page}
+								</Button>
+							</Link>
 						))}
 					</Box>
 					<FormControlLabel
 						control={
 							<Switch
+								color='secondary'
 								checked={isDark}
 								onChange={() => setIsDark(prev => !prev)}
 							/>
