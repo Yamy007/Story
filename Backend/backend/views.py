@@ -20,6 +20,8 @@ def posts(request):
             "current": page_obj.number,
             "has_next": page_obj.has_next(),
             "has_previous": page_obj.has_previous(),
+            "number_of_pages": paginated.num_pages,
+            "number_of_stories": paginated.count
         },
         "data": [story.serialize() for story in page_obj.object_list]
     }
