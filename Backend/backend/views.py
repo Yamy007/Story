@@ -1,6 +1,10 @@
 from django.http import JsonResponse
+from .models import *
+import json
 # Create your views here.
 
-def home(request):
-    array = [1,2,3,4,5,6,6]
-    return JsonResponse(array, safe=False)
+
+def posts(request):
+    all_posts = Story.objects.all()
+    return JsonResponse([post.serialize() for post in all_posts], safe=False)
+    
