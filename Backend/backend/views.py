@@ -5,6 +5,10 @@ from django.core.paginator import Paginator
 # Create your views here.
 
 
+def get_genre_for_Yaroslav(request):
+    all_genres = Genre.objects.all()
+    return JsonResponse([genre.serialize() for genre in all_genres], safe=False)
+
 def posts(request):
     # for i in range(1, 5):
     #     for j in range(1, 25):
@@ -14,7 +18,6 @@ def posts(request):
             
     page_number = request.GET.get("page", 1)
     genre = request.GET.get("genre", 0)
-    all_genres = Genre.objects.all()
     story_id = request.GET.get('story', 0)
     related_page_number = request.GET.get("related_page", 1)
     story_page_number = request.GET.get("story_page", 1)
@@ -44,15 +47,14 @@ def posts(request):
         paginated = Paginator(all_posts, per_page=5)
         page_obj = paginated.get_page(related_page_number)
         response = {
-            "related_page": {
-                "current": page_obj.number,
-                "has_next_page": page_obj.has_next(),
-                "has_previous_page": page_obj.has_previous(),
-                "number_of_pages": paginated.num_pages,
-                "number_of_stories": paginated.count       
+            "story_page": {
+                "story_page_count": paginated_story.num_pages,
+                "story_current": page_story_obj.number,
+                "story_has_next_page": page_story_obj.has_next(),
+                "story_has_previous_page": page_story_obj.has_previous(),
             },
-            "genre": [genre.serialize() for genre in all_genres],
             "story_data": {
+                "body":page_story_obj.object_list,
                 "story_id":story.id,
                 "user_id":story.user_id,
                 "title": story.title,
@@ -61,12 +63,13 @@ def posts(request):
                 "genres": [genre.genre for genre in story.genres.all()],
                 "views": story.views
             },
-            "story_page": {
-                "body":page_story_obj.object_list,
-                "story_page_count": paginated_story.num_pages,
-                "story_current": page_story_obj.number,
-                "story_has_next_page": page_story_obj.has_next(),
-                "story_has_previous_page": page_story_obj.has_previous(),
+            
+            "related_page": {
+                "current": page_obj.number,
+                "has_next_page": page_obj.has_next(),
+                "has_previous_page": page_obj.has_previous(),
+                "number_of_pages": paginated.num_pages,
+                "number_of_stories": paginated.count       
             },
             "related": [story.serialize() for story in page_obj.object_list],
         }
@@ -80,7 +83,6 @@ def posts(request):
                 "number_of_pages": paginated.num_pages,
                 "number_of_stories": paginated.count
             },
-            "genre": [genre.serialize() for genre in all_genres],
             "data": [story.serialize() for story in page_obj.object_list],
             
         }
