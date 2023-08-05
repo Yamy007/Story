@@ -14,8 +14,9 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { Button, Box } from '@mui/material'
 import { Link } from 'react-router-dom'
 import clipboardCopy from 'clipboard-copy'
-
-export const Story = ({ story }) => {
+import { Color } from '../ColorGenre/Color'
+export const Story = ({ story, isDark }) => {
+	const data = Color(isDark)
 	const handleCopyToClipboard = id => {
 		const textToCopy = window.location.href + '/' + id
 		clipboardCopy(textToCopy)
@@ -49,21 +50,44 @@ export const Story = ({ story }) => {
 								</Avatar>
 							}
 							action={
-								<IconButton aria-label='settings'>
+								<IconButton
+									aria-label='settings'
+									style={isDark ? { color: '#B8B8B8' } : { color: '#363434' }}
+								>
 									<MoreVertIcon />
 								</IconButton>
 							}
-							title={elem.title}
-							subheader={elem.date}
+							title={
+								<span
+									style={isDark ? { color: '#EBEBEB' } : { color: 'green' }}
+								>
+									{elem.title}
+								</span>
+							}
+							subheader={
+								<span
+									style={isDark ? { color: '#B3B3B3' } : { color: 'green' }}
+								>
+									{elem.date}
+								</span>
+							}
 						/>
 
 						<CardContent>
-							<Typography variant='body2' color='text.secondary'>
+							<Typography variant='body2' color={isDark ? '#EFEAEA' : 'green'}>
 								{elem.story_body}
 							</Typography>
-							<Typography variant='h5' color='text.secondary'>
+							<Typography variant='h5'>
 								{elem.genres?.map((elem, index) => (
-									<Button variant='text' color='error' key={index}>
+									<Button
+										variant='contained'
+										style={{
+											background: data?.filter(color => color.genre === elem)[0]
+												?.color,
+											margin: '0.3em',
+										}}
+										key={index}
+									>
 										{elem}
 									</Button>
 								))}
@@ -72,15 +96,23 @@ export const Story = ({ story }) => {
 					</Box>
 					<CardActions disableSpacing>
 						<IconButton
+							style={isDark ? { color: '#B8B8B8' } : { color: '#363434' }}
 							aria-label='add to favorites'
 							onClick={() => console.log('click')}
 						>
 							<FavoriteIcon />
 						</IconButton>
-						<Typography variant='body2' component='p'>
+						<Typography
+							variant='body2'
+							component='p'
+							style={isDark ? { color: '#B8B8B8' } : { color: '#363434' }}
+						>
 							Likes: {elem.likes}
 						</Typography>
-						<IconButton aria-label='share'>
+						<IconButton
+							aria-label='share'
+							style={isDark ? { color: '#B8B8B8' } : { color: '#363434' }}
+						>
 							<ShareIcon onClick={() => handleCopyToClipboard(elem.story_id)} />
 						</IconButton>
 						<Link to={`/story/${elem.story_id}`}>

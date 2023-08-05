@@ -8,8 +8,9 @@ import { Header } from './components/Home/Header'
 import { Storys } from './components/Story/Storys'
 import { Box } from '@mui/material'
 import { StoryInfo } from './components/Story/StoryInfo'
+import { Color } from './components/ColorGenre/Color'
 function App() {
-	const [isDark, setIsDark] = useState(false)
+	const [isDark, setIsDark] = useState(true)
 	return (
 		<ThemeProvider theme={isDark ? darkTheme : lightTheme}>
 			<Header isDark={isDark} setIsDark={setIsDark} />
@@ -22,7 +23,10 @@ function App() {
 					path='/story'
 					element={<Storys isDark={isDark} setIsDark={setIsDark} />}
 				></Route>
-				<Route path='/story/:id' element={<StoryInfo />}></Route>
+				<Route
+					path='/story/:id'
+					element={<StoryInfo isDark={isDark} />}
+				></Route>
 			</Routes>
 		</ThemeProvider>
 	)
