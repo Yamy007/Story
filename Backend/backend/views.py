@@ -23,7 +23,7 @@ def posts(request):
     story_page_number = request.GET.get("story_page", 1)
     
     if request.method == "GET" and genre == 0:
-        all_posts = Story.objects.all().distinct()
+        all_posts = Story.objects.all().order_by('-views').distinct()
         paginated = Paginator(all_posts, per_page=10)
         page_obj = paginated.get_page(page_number)
         
@@ -71,7 +71,7 @@ def posts(request):
                 "number_of_pages": paginated.num_pages,
                 "number_of_stories": paginated.count       
             },
-            "related": [story.serialize() for story in page_obj.object_list],
+            "related": [related_stories.serialize() for related_stories in page_obj.object_list if related_stories != story],
         }
         return JsonResponse(response, safe=False)
     
