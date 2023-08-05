@@ -1,0 +1,9 @@
+.story {
+	width: 95vw;
+	height: 100%;
+
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 1.2em;
+	padding: 2em;
+}
