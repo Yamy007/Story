@@ -25,7 +25,7 @@ class Story(models.Model):
     story_body = models.CharField(max_length=10000)
     likes = models.IntegerField(default=0)
     date = models.DateField(auto_now_add=True)
-    genres = models.ManyToManyField(Genre)
+    genres = models.ManyToManyField(Genre, related_name='genres')
     
     def _init_(self):
         return self
