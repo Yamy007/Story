@@ -12,7 +12,7 @@ import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import MenuItem from '@mui/material/MenuItem'
 import { FormControlLabel, Switch } from '@mui/material'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const pages = ['Home', 'Story', 'Blog']
 const settings = ['Settings', 'Logout']

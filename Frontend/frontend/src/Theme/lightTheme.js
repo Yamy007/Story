@@ -11,5 +11,8 @@ export const lightTheme = createTheme({
 		secondary: {
 			main: '#edf2ff',
 		},
+		info: {
+			main: '#05c228',
+		},
 	},
 })

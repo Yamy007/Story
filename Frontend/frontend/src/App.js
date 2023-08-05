@@ -18,7 +18,10 @@ function App() {
 					path='/'
 					element={<Home isDark={isDark} setIsDark={setIsDark} />}
 				></Route>
-				<Route path='/story' element={<Storys />}></Route>
+				<Route
+					path='/story'
+					element={<Storys isDark={isDark} setIsDark={setIsDark} />}
+				></Route>
 				<Route path='/story/:id' element={<StoryInfo />}></Route>
 			</Routes>
 		</ThemeProvider>

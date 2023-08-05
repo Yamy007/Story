@@ -4,7 +4,7 @@ import { api } from '../api/api'
 import { Box } from '@mui/material'
 import { Container } from '../Home/Container'
 
-export const Storys = () => {
+export const Storys = ({ isDark }) => {
 	const [story, setStory] = useState()
 	const [data, setData] = useState(1)
 	const [page, setPage] = useState(1)
@@ -22,7 +22,13 @@ export const Storys = () => {
 	}, [page])
 	return (
 		<>
-			<Container story={story} data={data} setPage={setPage} page={page} />
+			<Container
+				story={story}
+				data={data}
+				setPage={setPage}
+				page={page}
+				isDark={isDark}
+			/>
 		</>
 	)
 }
