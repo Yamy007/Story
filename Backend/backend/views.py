@@ -13,43 +13,62 @@ def posts(request):
     #         dbObject.genres.add(Genre.objects.all()[i])
             
     page_number = request.GET.get("page", 1)
-    genre = request.GET.get("genre", "aojsdhaijsd12")
+    genre = request.GET.get("genre", 0)
     all_genres = Genre.objects.all()
     story_id = request.GET.get('story', 0)
+    related_page_number = request.GET.get("related_page", 1)
+    story_page_number = request.GET.get("story_page", 1)
     
-    if request.method == "GET" and genre == "aojsdhaijsd12":
-        all_posts = Story.objects.all()
+    if request.method == "GET" and genre == 0:
+        all_posts = Story.objects.all().distinct()
         paginated = Paginator(all_posts, per_page=10)
         page_obj = paginated.get_page(page_number)
         
     
-    if request.method == "GET" and genre != "aojsdhaijsd12":
+    if request.method == "GET" and genre != 0:
         filter_genre = genre.split(",")
-        ids = [Genre.objects.get(genre = genre).id for genre in filter_genre]
-        all_posts = Story.objects.filter(genres__in = ids)
+        # ids = [Genre.objects.get(genre = genre).id for genre in filter_genre]
+        all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('-views').distinct()
         paginated = Paginator(all_posts, per_page=10)
         page_obj = paginated.get_page(page_number)
     
     if request.method == "GET" and story_id != 0:
         story = Story.objects.get(pk = story_id)
-        print(story.genres)
         clean_data = story.serialize()
         genres = clean_data["genres"]
+        splitted_story = [(clean_data['story_body'][i:i+500]) for i in range(0, len(clean_data['story_body']), 500)]
+        paginated_story = Paginator(splitted_story, per_page=1)
+        page_story_obj = paginated_story.get_page(story_page_number)
         ids = [Genre.objects.get(genre = genre).id for genre in genres]
-        all_posts = Story.objects.filter(genres__in = ids).order_by('-views')
+        all_posts = Story.objects.filter(genres__in = ids).order_by('-views').distinct()
         paginated = Paginator(all_posts, per_page=5)
-        page_obj = paginated.get_page(page_number)
+        page_obj = paginated.get_page(related_page_number)
         response = {
-            "page": {
+            "related_page": {
                 "current": page_obj.number,
-                "has_next": page_obj.has_next(),
-                "has_previous": page_obj.has_previous(),
+                "has_next_page": page_obj.has_next(),
+                "has_previous_page": page_obj.has_previous(),
                 "number_of_pages": paginated.num_pages,
-                "number_of_stories": paginated.count
+                "number_of_stories": paginated.count       
             },
             "genre": [genre.serialize() for genre in all_genres],
-            "data": clean_data,
-            "related": [story.serialize() for story in page_obj.object_list]
+            "story_data": {
+                "story_id":story.id,
+                "user_id":story.user_id,
+                "title": story.title,
+                "date": story.date,
+                "likes": story.likes,
+                "genres": [genre.genre for genre in story.genres.all()],
+                "views": story.views
+            },
+            "story_page": {
+                "body":page_story_obj.object_list,
+                "story_page_count": paginated_story.num_pages,
+                "story_current": page_story_obj.number,
+                "story_has_next_page": page_story_obj.has_next(),
+                "story_has_previous_page": page_story_obj.has_previous(),
+            },
+            "related": [story.serialize() for story in page_obj.object_list],
         }
         return JsonResponse(response, safe=False)
     
