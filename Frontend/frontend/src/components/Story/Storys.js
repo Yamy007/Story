@@ -8,12 +8,13 @@ import { Container } from '../Home/Container'
 
 export const Storys = () => {
 	const [story, setStory] = useState()
+	const [data, setData] = useState(1)
 	const [page, setPage] = useState(1)
 	useEffect(() => {
 		const FetchData = async () => {
 			try {
-				const response = await api.get('get_all_posts?page=1')
-				console.log(response)
+				const response = await api.get(`get_all_posts?page=${page}`)
+				setData(response.page)
 				setStory(response.data.data)
 			} catch (err) {
 				console.log(err)
@@ -23,7 +24,7 @@ export const Storys = () => {
 	}, [page])
 	return (
 		<Box className={styles.story}>
-			<Container story={story} setPage={setPage} page={page} />
+			<Container story={story} data={data} setPage={setPage} page={page} />
 		</Box>
 	)
 }
