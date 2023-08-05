@@ -35,10 +35,9 @@ export const Header = ({ isDark, setIsDark }) => {
 	const handleCloseUserMenu = () => {
 		setAnchorElUser(null)
 	}
-	let path = useLocation().pathname
-	console.log('path', path)
+
 	return (
-		<AppBar position='static'>
+		<AppBar position='fixed' sx={{ height: '8vh' }}>
 			<Container maxWidth='xl'>
 				<Toolbar disableGutters>
 					<Typography

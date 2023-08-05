@@ -1,4 +1,3 @@
-import './App.css'
 import { Route, Routes } from 'react-router-dom'
 import { Home } from './components/Home/Home'
 import { useState } from 'react'
@@ -8,6 +7,7 @@ import { lightTheme } from './Theme/lightTheme'
 import { Header } from './components/Home/Header'
 import { Storys } from './components/Story/Storys'
 import { Box } from '@mui/material'
+import { StoryInfo } from './components/Story/StoryInfo'
 function App() {
 	const [isDark, setIsDark] = useState(false)
 	return (
@@ -19,6 +19,7 @@ function App() {
 					element={<Home isDark={isDark} setIsDark={setIsDark} />}
 				></Route>
 				<Route path='/story' element={<Storys />}></Route>
+				<Route path='/story/:id' element={<StoryInfo />}></Route>
 			</Routes>
 		</ThemeProvider>
 	)

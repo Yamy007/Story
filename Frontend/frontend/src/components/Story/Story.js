@@ -11,56 +11,65 @@ import { red } from '@mui/material/colors'
 import FavoriteIcon from '@mui/icons-material/Favorite'
 import ShareIcon from '@mui/icons-material/Share'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { Button } from '@mui/material'
+import { Button, Box } from '@mui/material'
+import { Link } from 'react-router-dom'
 export const Story = ({ story }) => {
 	return (
 		<>
 			{story?.map(elem => (
-				<Card sx={{ maxWidth: 345 }}>
-					<CardHeader
-						avatar={
-							<Avatar sx={{ bgcolor: red[500] }} aria-label='recipe'>
-								R
-							</Avatar>
-						}
-						action={
-							<IconButton aria-label='settings'>
-								<MoreVertIcon />
+				<Link to={`/story/${elem.story_id}`}>
+					<Card
+						sx={{
+							display: 'flex',
+							flexDirection: 'column',
+							justifyContent: 'space-between',
+							minHeight: '38vh',
+							cursor: 'pointer',
+						}}
+						className='card'
+					>
+						<Box>
+							<CardHeader
+								avatar={
+									<Avatar sx={{ bgcolor: red[500] }} aria-label='recipe'>
+										R
+									</Avatar>
+								}
+								action={
+									<IconButton aria-label='settings'>
+										<MoreVertIcon />
+									</IconButton>
+								}
+								title={elem.title}
+								subheader={elem.date}
+							/>
+
+							<CardContent>
+								<Typography variant='body2' color='text.secondary'>
+									{elem.story_body}
+								</Typography>
+								<Typography variant='h5' color='text.secondary'>
+									{elem.genres?.map((elem, index) => (
+										<Button variant='text' color='error' key={index}>
+											{elem}
+										</Button>
+									))}
+								</Typography>
+							</CardContent>
+						</Box>
+						<CardActions disableSpacing>
+							<IconButton aria-label='add to favorites'>
+								<FavoriteIcon />
 							</IconButton>
-						}
-						title={elem.title}
-						subheader={elem.date}
-					/>
-					<CardMedia
-						component='img'
-						height='194'
-						image='https://source.unsplash.com/random'
-						alt='Paella dish'
-					/>
-					<CardContent>
-						<Typography variant='body2' color='text.secondary'>
-							{elem.story_body}
-						</Typography>
-						<Typography variant='h5' color='text.secondary'>
-							{elem.genres?.map((elem, index) => (
-								<Button variant='text' color='error' key={index}>
-									{elem}
-								</Button>
-							))}
-						</Typography>
-					</CardContent>
-					<CardActions disableSpacing>
-						<IconButton aria-label='add to favorites'>
-							<FavoriteIcon />
-						</IconButton>
-						<Typography variant='body2' component='p'>
-							Likes: {elem.likes}
-						</Typography>
-						<IconButton aria-label='share'>
-							<ShareIcon />
-						</IconButton>
-					</CardActions>
-				</Card>
+							<Typography variant='body2' component='p'>
+								Likes: {elem.likes}
+							</Typography>
+							<IconButton aria-label='share'>
+								<ShareIcon />
+							</IconButton>
+						</CardActions>
+					</Card>
+				</Link>
 			))}
 		</>
 	)
