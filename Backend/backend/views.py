@@ -39,7 +39,7 @@ def posts(request):
         story = Story.objects.get(pk = story_id)
         clean_data = story.serialize()
         genres = clean_data["genres"]
-        splitted_story = [(clean_data['story_body'][i:i+500]) for i in range(0, len(clean_data['story_body']), 500)]
+        splitted_story = [(clean_data['story_body'][i:i+2000]) for i in range(0, len(clean_data['story_body']), 2000)]
         paginated_story = Paginator(splitted_story, per_page=1)
         page_story_obj = paginated_story.get_page(story_page_number)
         ids = [Genre.objects.get(genre = genre).id for genre in genres]
