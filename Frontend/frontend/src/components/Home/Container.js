@@ -1,18 +1,21 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Box, Pagination } from '@mui/material'
-import { Storys } from '../Story/Storys'
+import { Story } from '../Story/Story'
 
-export const Container = ({ story, page }) => {
+export const Container = ({ story, data, setPage, page }) => {
+	const [p, setP] = useState(1)
 	return (
-		<Box>
-			<Storys />
+		<>
+			<Story story={story} />
 			<Pagination
 				variant='outlined'
 				color='secondary'
-				count={100}
+				count={11}
 				page={page}
-				onPageChange={handleChangePage}
+				onChange={(e, newPage) => {
+					setPage(newPage)
+				}}
 			/>
-		</Box>
+		</>
 	)
 }
