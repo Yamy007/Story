@@ -27,7 +27,11 @@ export const StoryInfo = ({ isDark }) => {
 	return (
 		<Box bgcolor={isDark ? '#000000e8' : '#EBEBEB'} className={styles.wrapper}>
 			<Box className={styles.content}>
-				<Typography variant='h5' component='p'>
+				<Typography
+					variant='h5'
+					component='p'
+					style={isDark ? { color: '#B8B8B8' } : { color: '#363434' }}
+				>
 					{story?.body[0]}
 				</Typography>
 			</Box>
