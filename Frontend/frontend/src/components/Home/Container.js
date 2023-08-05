@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Box, Pagination } from '@mui/material'
 import { Story } from '../Story/Story'
-
+import styles from './Style/Style.module.css'
 export const Container = ({ story, data, setPage, page }) => {
-	const [p, setP] = useState(1)
 	return (
-		<>
+		<Box className={styles.wrapper}>
 			<Story story={story} />
 			<Pagination
 				variant='outlined'
@@ -16,6 +15,6 @@ export const Container = ({ story, data, setPage, page }) => {
 					setPage(newPage)
 				}}
 			/>
-		</>
+		</Box>
 	)
 }

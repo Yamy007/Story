@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
-import { Story } from './Story'
 import { api } from '../api/api'
 import { Box } from '@mui/material'
-import styles from './Style/Story.module.css'
 import { Container } from '../Home/Container'
 
 export const Storys = () => {
@@ -23,8 +21,8 @@ export const Storys = () => {
 		FetchData()
 	}, [page])
 	return (
-		<Box className={styles.story}>
+		<>
 			<Container story={story} data={data} setPage={setPage} page={page} />
-		</Box>
+		</>
 	)
 }
