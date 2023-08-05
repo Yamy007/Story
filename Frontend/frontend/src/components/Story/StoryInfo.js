@@ -21,8 +21,62 @@ export const StoryInfo = ({ isDark }) => {
 	}, [])
 	return (
 		<Box bgcolor={isDark ? '#000000e8' : '#EBEBEB'} className={styles.wrapper}>
-			<Box>
+			<Box className={styles.content}>
 				<Typography variant='h5' component='p'>
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
+					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
+					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
 					Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis commodi
 					sequi consequatur dolor incidunt, deserunt ad illo maxime ipsum minus
 					quod repudiandae amet natus modi aut aspernatur ut voluptates nisi?
