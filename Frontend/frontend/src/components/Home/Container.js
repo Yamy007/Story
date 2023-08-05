@@ -9,7 +9,7 @@ export const Container = ({ story, data, setPage, page, isDark }) => {
 			bgcolor={isDark ? '#000000e8' : '#EBEBEB'}
 		>
 			<Box className={styles.wrapper}>
-				<Story story={story} />
+				<Story story={story} isDark={isDark} />
 			</Box>
 			<Box className={styles.pagination}>
 				<Pagination
