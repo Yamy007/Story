@@ -1,4 +1,5 @@
 .wrapper {
+	padding-top: 10vh;
 	max-width: 100vw;
-	min-height: 100vh;
+	min-height: 90vh;
 }
