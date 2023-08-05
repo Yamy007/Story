@@ -12,7 +12,7 @@ import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import MenuItem from '@mui/material/MenuItem'
 import { FormControlLabel, Switch } from '@mui/material'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const pages = ['Home', 'Story', 'Blog']
 const settings = ['Settings', 'Logout']
@@ -35,10 +35,9 @@ export const Header = ({ isDark, setIsDark }) => {
 	const handleCloseUserMenu = () => {
 		setAnchorElUser(null)
 	}
-	let path = useLocation().pathname
-	console.log('path', path)
+
 	return (
-		<AppBar position='static'>
+		<AppBar position='fixed' sx={{ height: '8vh' }}>
 			<Container maxWidth='xl'>
 				<Toolbar disableGutters>
 					<Typography
