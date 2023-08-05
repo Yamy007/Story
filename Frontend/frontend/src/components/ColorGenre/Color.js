@@ -27,9 +27,9 @@ export const Color = isDark => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await api.get('get_all_posts')
+				const response = await api.get('get_all_genres')
 				setGenre(
-					response.data.genre.map(genre => ({
+					response.data.map(genre => ({
 						...genre,
 						color: getRandomBrightColor(isDark),
 					}))
