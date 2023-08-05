@@ -16,8 +16,6 @@ class Genre(models.Model):
             "genre": self.genre,
         }
     
-    class Meta:
-        ordering = ['id'] 
         
 class Story(models.Model):
     user_id = models.IntegerField(default=None)
@@ -26,6 +24,7 @@ class Story(models.Model):
     likes = models.IntegerField(default=0)
     date = models.DateField(auto_now_add=True)
     genres = models.ManyToManyField(Genre, related_name='genres')
+    views = models.IntegerField(default=0)
     
     def _init_(self):
         return self
@@ -41,11 +40,10 @@ class Story(models.Model):
             "story_body": self.story_body,
             "likes": self.likes,
             "date": self.date,
-            "genres": [genre.genre for genre in self.genres.all()]
+            "genres": [genre.genre for genre in self.genres.all()],
+            "views": self.views
         }
         
-    class Meta:
-        ordering = ['-date']
         
 class Comments(models.Model):
     user_id = models.IntegerField(default=None)
@@ -65,6 +63,3 @@ class Comments(models.Model):
             "comment_body": self.comment_body,
             "story": self.story,
         }
-    
-    class Meta:
-        ordering = ['user_id']
