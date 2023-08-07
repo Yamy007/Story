@@ -8,7 +8,7 @@ from django.utils.decorators import method_decorator
 from django.http import JsonResponse
 from string import punctuation
 import re
-from profanity_filter import ProfanityFilter
+#from profanity_filter import ProfanityFilter
 
 
 class GetUserProfilesView(APIView):
@@ -33,9 +33,9 @@ class UpdateUserProfile(APIView):
     
     
     def post(self, request, format=None):
-        pf = ProfanityFilter(languages=['ru', 'en', 'ua'])
-        pf.censor_whole_words = False
-        pf.censor_char = '*'
+        # pf = ProfanityFilter()
+        # pf.censor_whole_words = False
+        # pf.censor_char = '*'
         data = self.request.data
         user_id = self.request.user.id
         
@@ -43,8 +43,8 @@ class UpdateUserProfile(APIView):
             first_name = data['first_name']
             if any(symbol in first_name for symbol in set(punctuation)) or " " in first_name:
                 return JsonResponse({'error':'special symbols are not allowed in first_name'})
-            if pf.is_profane(first_name):
-                return JsonResponse({'error':'bad words are not allowed'})
+            # if pf.is_profane(first_name):
+            #     return JsonResponse({'error':'bad words are not allowed'})
             modify = UserProfile.objects.get(user__id = user_id)
             modify.first_name = first_name.capitalize()
             modify.save()
@@ -56,8 +56,8 @@ class UpdateUserProfile(APIView):
             last_name = data['last_name']
             if any(symbol in last_name for symbol in set(punctuation)) or " " in last_name:
                 return JsonResponse({'error':'special symbols are not allowed in last_name'})
-            if pf.is_profane(last_name):
-                return JsonResponse({'error':'bad words are not allowed'})
+            # if pf.is_profane(last_name):
+            #     return JsonResponse({'error':'bad words are not allowed'})
             modify = UserProfile.objects.get(user__id = user_id)
             modify.last_name = last_name.capitalize()
             modify.save()
@@ -93,8 +93,8 @@ class UpdateUserProfile(APIView):
             
         try:
             address = data['city']
-            if pf.is_profane(address):
-                return JsonResponse({'error':'bad words are not allowed'})
+            # if pf.is_profane(address):
+            #     return JsonResponse({'error':'bad words are not allowed'})
             modify = UserProfile.objects.get(user__id = user_id)
             modify.address = address.capitalize()
             modify.save()
@@ -105,7 +105,8 @@ class UpdateUserProfile(APIView):
         try:
             bio = data['bio']
             modify = UserProfile.objects.get(user__id = user_id)
-            modify.bio = pf.censor(bio)
+            # modify.bio = pf.censor(bio)
+            modify.bio = bio
             modify.save()
         except:
             return JsonResponse({'error': 'didnt update the profile bio'})

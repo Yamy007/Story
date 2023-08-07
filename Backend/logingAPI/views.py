@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.contrib import auth
 from string import punctuation
 from django.http import JsonResponse
+# from profanity_filter import ProfanityFilter
 
 @method_decorator(csrf_protect, name='dispatch')
 class CheckAuthenticationStatus(APIView):
@@ -25,6 +26,9 @@ class SignUpView(APIView):
     permission_classes = (permissions.AllowAny,)
     
     def post(self, request, format=None):
+        # pf = ProfanityFilter()
+        # pf.censor_whole_words = False
+        # pf.censor_char = '*'
         data = self.request.data 
         email = data['email']
         username = data['username']
@@ -51,6 +55,9 @@ class SignUpView(APIView):
                     return JsonResponse({'error': 'password cannot contain special symbols'}, safe=False)
                 if password.isnumeric():
                     return JsonResponse({'error':'password cannot be entirely numeric'}, safe=False)
+                # if pf.is_profane(username):
+                #     return JsonResponse({'error':'username cannot contain bad words'}, safe=False)
+                
                 user = User.objects.create_user(username=username, password=password, email=email)
                 user.save()
                 upd_user_status = User.objects.get(pk=user.id)
