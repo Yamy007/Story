@@ -21,7 +21,7 @@ class CheckAuthenticationStatus(APIView):
             return JsonResponse({'error':'something went wrong during authentication check'})
         
         
-@method_decorator(csrf_protect, name='dispatch')
+# @method_decorator(csrf_protect, name='dispatch')
 class SignUpView(APIView):
     permission_classes = (permissions.AllowAny,)
     
