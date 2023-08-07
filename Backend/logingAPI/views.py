@@ -30,10 +30,13 @@ class SignUpView(APIView):
         # pf.censor_whole_words = False
         # pf.censor_char = '*'
         data = self.request.data 
-        email = data['email']
-        username = data['username']
-        password = data['password']
-        re_password = data['re_password']
+        try:
+            email = data['email']
+            username = data['username']
+            password = data['password']
+            re_password = data['re_password']
+        except:
+            return JsonResponse({'error':'wrong input data'})
         try:
             superuser_secret_word = data['secret']
         except:

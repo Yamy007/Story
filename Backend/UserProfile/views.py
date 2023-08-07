@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 from logingAPI.models import *
+from backend.models import *
 from .serializer import *
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
@@ -16,7 +17,6 @@ class GetUserProfilesView(APIView):
     
     def get(self, request, format=None):
         isPremium = request.GET.get('premium')
-        print(isPremium)
         choices= {1:UserProfile.objects.filter(is_premium=True),
                   0:UserProfile.objects.filter(is_premium=False),
                   None:UserProfile.objects.all()}
@@ -113,3 +113,13 @@ class UpdateUserProfile(APIView):
             
         return JsonResponse({'success': 'user profile successfully updated'})     
             
+@method_decorator(csrf_protect, name='dispatch')   
+class GetUserProfilePage(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def get(self, request, format=None):
+        user = self.request.user
+        data = self.request.data
+        
+        liked_stories = Story.objects.filter(liked_by__id = user.id)
+        
