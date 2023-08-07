@@ -15,5 +15,8 @@ export const darkTheme = createTheme({
 		info: {
 			main: '#0e0',
 		},
+		warning: {
+			main: '#E27AD9',
+		},
 	},
 })
