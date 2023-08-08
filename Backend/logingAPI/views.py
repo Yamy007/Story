@@ -100,19 +100,7 @@ def Login(request):
         username = data['username']
         password = data['password']
         
-<<<<<<< HEAD
         user = auth.authenticate(username=username, password=password)
-=======
-class LogoutView(APIView):
-    #permission_classes = (permissions.IsAuthenticated,)
-    
-    def post(self, request, format=None):
-        try:
-            auth.logout(request)
-            return JsonResponse({'success':'logged out'}, safe=False)
-        except:
-            return JsonResponse({'error':'error when logging OUT'}, safe=False)   
->>>>>>> 2e96c9a6d113f0072261ead209812a74296bf6d3
         
         if user is not None:
             auth.login(request, user)
