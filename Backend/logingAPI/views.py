@@ -109,7 +109,7 @@ class LoginView(APIView):
             return JsonResponse({'error':'something went wrong during logination'}, safe=False)
         
 class LogoutView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    #permission_classes = (permissions.IsAuthenticated,)
     
     def post(self, request, format=None):
         try:
