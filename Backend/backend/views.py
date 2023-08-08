@@ -10,11 +10,19 @@ def get_genre_for_Yaroslav(request):
     return JsonResponse([genre.serialize() for genre in all_genres], safe=False)
 
 def posts(request):
-    # for i in range(1, 5):
-    #     for j in range(1, 25):
-    #         dbObject = Story(user_id = 1, title=f"Test Story{i+1}{j+1}", story_body=f"Testing story body{j+1}{i+1}", likes=i*j)
+    # comment = Comments(creator=request.user.id, comment_body="nice story bro")
+    # comment.save()
+    # genres = ["Life", "Horror", "Adventure", "Sad"]
+    # for m in range(len(genres)):
+    #     genre = Genre(genre=genres[m])
+    #     genre.save()
+        
+    # for i in range(4):
+    #     for j in range(25):
+    #         dbObject = Story(creator_id = request.user.id, title=f"Test Story{i+1}{j+1}", story_body=f"Testing story body{j+1}{i+1}")
     #         dbObject.save()
     #         dbObject.genres.add(Genre.objects.all()[i])
+    #         dbObject.comments.add(comment)
             
     page_number = request.GET.get("page", 1)
     genre = request.GET.get("genre", 0)
