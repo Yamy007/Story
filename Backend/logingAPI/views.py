@@ -9,7 +9,7 @@ from string import punctuation
 from django.http import JsonResponse
 # from profanity_filter import ProfanityFilter
 
-@method_decorator(csrf_protect, name='dispatch')
+#@method_decorator(csrf_protect, name='dispatch')
 class CheckAuthenticationStatus(APIView):
     def get(self, request, format=None):
         try:
@@ -21,14 +21,13 @@ class CheckAuthenticationStatus(APIView):
             return JsonResponse({'error':'something went wrong during authentication check'})
         
         
-# @method_decorator(csrf_protect, name='dispatch')
+#@method_decorator(csrf_protect, name='dispatch')
 class SignUpView(APIView):
     permission_classes = (permissions.AllowAny,)
     
     def post(self, request, format=None):
         # pf = ProfanityFilter()
         # pf.censor_whole_words = False
-        # pf.censor_char = '*'
         data = self.request.data 
         try:
             email = data['email']
@@ -89,7 +88,7 @@ class SignUpView(APIView):
            
         
  
-@method_decorator(csrf_protect, name='dispatch')
+#@method_decorator(csrf_protect, name='dispatch')
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
     
@@ -120,7 +119,7 @@ class LogoutView(APIView):
             return JsonResponse({'error':'error when logging OUT'}, safe=False)   
         
          
-@method_decorator(ensure_csrf_cookie, name='dispatch')       
+#@method_decorator(ensure_csrf_cookie, name='dispatch')
 class GetCSRF(APIView):
     permission_classes = (permissions.AllowAny,)
     

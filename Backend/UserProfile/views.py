@@ -9,6 +9,7 @@ from django.utils.decorators import method_decorator
 from django.http import JsonResponse
 from string import punctuation
 import re
+from django.core.paginator import Paginator
 #from profanity_filter import ProfanityFilter
 
 
@@ -27,7 +28,7 @@ class GetUserProfilesView(APIView):
         return Response(users.data)
    
     
-@method_decorator(csrf_protect, name='dispatch')   
+#@method_decorator(csrf_protect, name='dispatch')   
 class UpdateUserProfile(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
@@ -113,13 +114,35 @@ class UpdateUserProfile(APIView):
             
         return JsonResponse({'success': 'user profile successfully updated'})     
             
-@method_decorator(csrf_protect, name='dispatch')   
+#@method_decorator(csrf_protect, name='dispatch')   
 class GetUserProfilePage(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
     def get(self, request, format=None):
         user = self.request.user
-        data = self.request.data
         
-        liked_stories = Story.objects.filter(liked_by__id = user.id)
+        liked_stories = Story.objects.filter(liked_by__id = user.id).count()
+        user_profile = UserProfile.objects.get(user__id = user.id)
+        
+        response = {
+            "status_is_premium": user_profile.is_premium,
+            "first_name": user_profile.first_name,
+            "last_name": user_profile.last_name,
+            "email": user_profile.email,
+            "phone": user_profile.phone,
+            "address": user_profile.address,
+            "bio": user_profile.bio,
+            "number_of_likes": liked_stories,
+        }
+        
+        return JsonResponse(response, safe=False)
+    
+class GetUserLikedPosts(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def get(self, request, format=None):
+        user = self.request.user
+        
+        liked_posts = Story.objects.filter(liked_by__id = user.id).order_by('-views').distinct()
+        
         
