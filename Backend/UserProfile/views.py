@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from string import punctuation
 import re
 from django.core.paginator import Paginator
+from django.utils.datastructures import MultiValueDictKeyError
 #from profanity_filter import ProfanityFilter
 
 
@@ -53,9 +54,12 @@ class UpdateUserProfile(APIView):
         try:
             thumbnail = request.FILES['image']
             update_user_picture = UserProfile.objects.get(user__id = user_id)
+            update_user_picture.image = thumbnail
+            update_user_picture.save()
+        except (MultiValueDictKeyError, KeyError):
+            pass
         except:
-            return JsonResponse({'error': 'didnt update the profile picture'})
-            
+            return JsonResponse({'error': 'didnt update the profile photo'})
         
         try:
             first_name = data['first_name']
@@ -66,6 +70,8 @@ class UpdateUserProfile(APIView):
             modify = UserProfile.objects.get(user__id = user_id)
             modify.first_name = first_name.capitalize()
             modify.save()
+        except (MultiValueDictKeyError, KeyError):
+            pass
         except:
             return JsonResponse({'error': 'didnt update the profile first_name'})
             
@@ -79,6 +85,8 @@ class UpdateUserProfile(APIView):
             modify = UserProfile.objects.get(user__id = user_id)
             modify.last_name = last_name.capitalize()
             modify.save()
+        except (MultiValueDictKeyError, KeyError):
+            pass
         except:
             return JsonResponse({'error': 'didnt update the profile last_name'})
             
@@ -92,6 +100,16 @@ class UpdateUserProfile(APIView):
                 modify.save()
             else:
                 return JsonResponse({'error': 'invalid email'})
+            
+            if User.objects.filter(email = email).exists():
+                return JsonResponse({'error': 'email is already in use'})
+            else:
+                modify = UserProfile.objects.get(user__id = user_id)
+                modify.email = email
+                modify.save()
+                
+        except (MultiValueDictKeyError, KeyError):
+            pass
         except:
             return JsonResponse({'error': 'didnt update the profile email'})
             
@@ -105,6 +123,8 @@ class UpdateUserProfile(APIView):
                 modify.save()
             else:
                 return JsonResponse({'error':'phone number is incorrect'})
+        except (MultiValueDictKeyError, KeyError):
+            pass
         except:
             return JsonResponse({'error': 'didnt update the profile phone'})
             
@@ -116,8 +136,10 @@ class UpdateUserProfile(APIView):
             modify = UserProfile.objects.get(user__id = user_id)
             modify.address = address.capitalize()
             modify.save()
+        except (MultiValueDictKeyError, KeyError):
+            pass
         except:
-            return JsonResponse({'error': 'didnt update the profile address'})
+            return JsonResponse({'error': 'didnt update the profile city'})
             
             
         try:
@@ -126,6 +148,8 @@ class UpdateUserProfile(APIView):
             # modify.bio = pf.censor(bio)
             modify.bio = bio
             modify.save()
+        except (MultiValueDictKeyError, KeyError):
+            pass
         except:
             return JsonResponse({'error': 'didnt update the profile bio'})
             
@@ -140,26 +164,34 @@ class GetUserProfilePage(APIView):
         
         liked_stories = Story.objects.filter(liked_by__id = user.id).count()
         user_profile = UserProfile.objects.get(user__id = user.id)
+        response = UserProfileSerializer(user_profile)
         
-        response = {
-            "status_is_premium": user_profile.is_premium,
-            "first_name": user_profile.first_name,
-            "last_name": user_profile.last_name,
-            "email": user_profile.email,
-            "phone": user_profile.phone,
-            "address": user_profile.address,
-            "bio": user_profile.bio,
-            "number_of_likes": liked_stories,
+        jsonresponse = {
+            "user_data": response.data,
+            "liked_stories": liked_stories,
         }
-        
-        return JsonResponse(response, safe=False)
+        return JsonResponse(jsonresponse, safe=False)
     
+
 class GetUserLikedPosts(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
     def get(self, request, format=None):
         user = self.request.user
+        related_page_number = request.GET.get('liked_page', 1)
         
         liked_posts = Story.objects.filter(liked_by__id = user.id).order_by('-views').distinct()
-        
-        
+        paginated = Paginator(liked_posts, per_page=10)
+        page_obj = paginated.get_page(related_page_number)
+        response = {
+            "story_page": {
+                "story_page_count": paginated.num_pages,
+                "story_current": page_obj.number,
+                "story_has_next_page": page_obj.has_next(),
+                "story_has_previous_page": page_obj.has_previous(),
+            },
+            "liked_stories_data":{
+                "id": [id.id for id in liked_posts]
+            }
+        }
+        return JsonResponse(response, safe=False)

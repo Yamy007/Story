@@ -95,7 +95,7 @@ def posts(request):
                 "number_of_pages": paginated.num_pages,
                 "number_of_stories": paginated.count
             },
-            "data": [story.serialize() for story in page_obj.object_list],
+            "data": [story.serialize_general() for story in page_obj.object_list],
             
         }
     return JsonResponse(response, safe=False)
