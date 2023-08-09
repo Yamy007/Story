@@ -211,6 +211,8 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 							{settings.map((setting, idx) => (
 								<Button
 									color='warning'
+									variant='outlined'
+									sx={{ margin: '5px' }}
 									key={idx}
 									onClick={() => Action(setting)}
 								>
