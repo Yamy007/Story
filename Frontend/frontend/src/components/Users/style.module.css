@@ -1,9 +1,22 @@
 .wrapper {
 	padding-top: 10vh;
-	width: 50vw;
-	height: 35vh;
+	width: 70vw;
+	height: fit-content;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
+	justify-content: space-around;
+	align-items: center;
+}
+.wrapper > div {
+	margin: 2vh;
+}
+
+.container {
+	padding-top: 10vh;
+	width: 100vw;
+	height: 90vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: start;
 	align-items: center;
 }

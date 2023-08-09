@@ -1,9 +1,9 @@
-import { Button, TextField } from '@mui/material'
+import { Box, Button, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { UserAuth } from '../api/user'
 import { useNavigate } from 'react-router-dom'
-
+import styles from './style.module.css'
 function checkStartingLetters(words, letters) {
 	const pattern = new RegExp(`^${letters}`, 'i')
 	for (const word of words) {
@@ -35,17 +35,28 @@ export const Login = ({ onSave }) => {
 	}
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)} style={{ paddingTop: '10vh' }}>
-			<TextField
-				label='username'
-				type='text'
-				onChange={e => setCheck(checkStartingLetters(data, e.target.value))}
-				error={!check}
-			/>
-			<TextField label='password' type='password' {...register('password')} />
-			<Button variant='text' type='submit'>
-				Login
-			</Button>
-		</form>
+		<Box className={styles.container}>
+			<form
+				onSubmit={handleSubmit(onSubmit)}
+				className={styles.wrapper}
+				style={{ paddingTop: '10vh' }}
+			>
+				<TextField
+					label='username'
+					type='text'
+					onChange={e => setCheck(checkStartingLetters(data, e.target.value))}
+					error={!check}
+				/>
+				<TextField label='password' type='password' {...register('password')} />
+				<Button
+					type='submit'
+					variant='contained'
+					size='large'
+					sx={{ width: '28vh' }}
+				>
+					Login
+				</Button>
+			</form>
+		</Box>
 	)
 }
