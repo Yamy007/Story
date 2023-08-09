@@ -17,11 +17,13 @@ function checkStartingLetters(words, letters) {
 export const Login = ({ onSave }) => {
 	const { register, handleSubmit } = useForm()
 	const [data, setData] = useState([])
+	const [check, setCheck] = useState(false)
 	useEffect(() => {
 		fetch('http://localhost:8000/auth/get_all_users')
 			.then(res => res.json())
-			.then(data => setData(data))
+			.then(res => setData(res))
 	}, [onSave])
+
 	let redirect = useNavigate()
 	const onSubmit = async data => {
 		const response = await UserAuth().login(data)
@@ -30,10 +32,15 @@ export const Login = ({ onSave }) => {
 			return redirect('/')
 		}
 	}
-	console.log(data)
+
 	return (
 		<form onSubmit={handleSubmit(onSubmit)} style={{ paddingTop: '10vh' }}>
-			<TextField label='username' {...register('username')} />
+			<TextField
+				label='username'
+				type='text'
+				onChange={e => setCheck(checkStartingLetters(data, e.target.value))}
+				error={!check}
+			/>
 			<TextField label='password' type='password' {...register('password')} />
 			<Button variant='text' type='submit'>
 				Login
