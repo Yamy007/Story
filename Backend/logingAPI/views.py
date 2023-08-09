@@ -7,9 +7,10 @@ from django.utils.decorators import method_decorator
 from django.contrib import auth
 from string import punctuation
 from django.http import JsonResponse
+from django.middleware.csrf import get_token
 # from profanity_filter import ProfanityFilter
 
-@method_decorator(csrf_protect, name='dispatch')
+#@method_decorator(csrf_protect, name='dispatch')
 class CheckAuthenticationStatus(APIView):
     def get(self, request, format=None):
         try:
@@ -21,7 +22,7 @@ class CheckAuthenticationStatus(APIView):
             return JsonResponse({'error':'something went wrong during authentication check'})
         
         
-@method_decorator(csrf_protect, name='dispatch')
+#@method_decorator(csrf_protect, name='dispatch')
 class SignUpView(APIView):
     permission_classes = (permissions.AllowAny,)
     
@@ -37,8 +38,8 @@ class SignUpView(APIView):
         try:
             superuser_secret_word = data['secret']
         except:
-            pass
-        
+            superuser_secret_word = None
+
         try:
             if password == re_password:
                 if User.objects.filter(username=username).exists():
@@ -86,7 +87,7 @@ class SignUpView(APIView):
            
         
  
-@method_decorator(csrf_protect, name='dispatch')
+#@method_decorator(csrf_protect, name='dispatch')
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
     
@@ -108,7 +109,7 @@ class LoginView(APIView):
         
 class LogoutView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
-    
+
     def post(self, request, format=None):
         try:
             auth.logout(request)
@@ -117,12 +118,12 @@ class LogoutView(APIView):
             return JsonResponse({'error':'error when logging OUT'}, safe=False)   
         
          
-@method_decorator(ensure_csrf_cookie, name='dispatch')       
+#@method_decorator(ensure_csrf_cookie, name='dispatch')       
 class GetCSRF(APIView):
-    permission_classes = (permissions.AllowAny,)
+    #permission_classes = (permissions.AllowAny,)
     
     def get(self, request, format=None):
-        return JsonResponse({'success':'csrf_cookie set!'}, safe=False)
+        return JsonResponse({'csrfToken': get_token(request)}, safe=False)
     
 
 class GetUsersView(APIView):

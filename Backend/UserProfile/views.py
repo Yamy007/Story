@@ -10,21 +10,39 @@ from string import punctuation
 import re
 #from profanity_filter import ProfanityFilter
 
+    # user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    # is_premium = models.BooleanField(default=False)
+    # first_name = models.CharField(default='', max_length=100)
+    # last_name = models.CharField(default='', max_length=100)
+    # email = models.EmailField(default='', max_length=100)
+    # phone = models.CharField(default='', max_length=100)
+    # address = models.CharField(default='', max_length=100)
+    # bio = models.TextField(default='', max_length=10000)
 
 class GetUserProfilesView(APIView):
     permission_classes = (permissions.AllowAny,)
     
     def get(self, request, format=None):
-        isPremium = request.GET.get('premium')
-        print(isPremium)
-        choices= {1:UserProfile.objects.filter(is_premium=True),
-                  0:UserProfile.objects.filter(is_premium=False),
-                  None:UserProfile.objects.all()}
+        isPremium = request.GET.get('premium', 2)
+        try:
+            users = None
+            isPremium = int(isPremium)
+        except:
+            return JsonResponse({'error':'wrong premium input value'})
         
-        users = choices.get(isPremium)
+        if isPremium == 2:
+            users = UserProfile.objects.all()
+        if isPremium == 1:
+            users = UserProfile.objects.filter(is_premium = True)
+        if isPremium == 0:
+            users = UserProfile.objects.filter(is_premium = False)
+        
             
-        users = UserProfileSerializer(users, many=True)
-        return Response(users.data)
+        if users: 
+            users = UserProfileSerializer(users, many=True)
+            return JsonResponse(users.data, safe=False)
+        else:
+            return JsonResponse({'error':'premium takes only 1,2,0 as parameters'})
    
     
 @method_decorator(csrf_protect, name='dispatch')   
