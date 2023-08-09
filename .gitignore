@@ -1,4 +1,8 @@
 myenv/
 Backend/myenv
-Backend/backend/__pycache__/
+/backend/__pycache__/
 __pycache__/
+Backend/backend/__pycache__
+Backend/backend/migrations
+Backend/backend/__pycache__
+Backend/backend/__pycache__
