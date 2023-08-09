@@ -2,15 +2,14 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { Button, TextField } from '@mui/material'
 import styles from './style.module.css'
-import { user } from '../api/user'
+import { UserAuth } from '../api/user'
 
-export const Register = () => {
+export const Register = ({ onSave }) => {
 	const { register, handleSubmit } = useForm()
-
-	const onSubmit = data => {
-		user.post('register', data).then(value => console.log(value))
+	const onSubmit = async data => {
+		onSave(prev => !prev)
+		console.log(await UserAuth().Registration(data))
 	}
-
 	return (
 		<form onSubmit={handleSubmit(onSubmit)} className={styles.wrapper}>
 			<TextField

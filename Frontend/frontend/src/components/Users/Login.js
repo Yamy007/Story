@@ -1,21 +1,12 @@
 import { Button, TextField } from '@mui/material'
 import React from 'react'
-<<<<<<< HEAD
-
-export const Login = () => {
-	return (
-		<form>
-			<TextField variant='outlined' label='Password' />
-			<TextField variant='outlined' label='Password' />
-			<Button variant='contained'>Login</Button>
-=======
 import { useForm } from 'react-hook-form'
-import { user } from '../api/user'
-export const Login = () => {
+import { UserAuth } from '../api/user'
+export const Login = ({ onSave }) => {
 	const { register, handleSubmit } = useForm()
-
-	const onSubmit = data => {
-		user.post('login', data).then(value => console.log(value))
+	const onSubmit = async data => {
+		console.log(await UserAuth().login(data))
+		onSave(prev => !prev)
 	}
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>
@@ -24,7 +15,6 @@ export const Login = () => {
 			<Button variant='text' type='submit'>
 				Login
 			</Button>
->>>>>>> main
 		</form>
 	)
 }
