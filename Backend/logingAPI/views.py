@@ -39,7 +39,6 @@ class SignUpView(APIView):
             superuser_secret_word = data['secret']
         except:
             superuser_secret_word = None
-
         try:
             if password == re_password:
                 if User.objects.filter(username=username).exists():
@@ -132,5 +131,5 @@ class GetUsersView(APIView):
     
     def get(self, request, format=None):
         users = User.objects.all()
-        users = UserSerializer(users, many=True)
-        return JsonResponse(users.data, safe=False)
+        return JsonResponse([user.username for user in users], safe=False)
+    
