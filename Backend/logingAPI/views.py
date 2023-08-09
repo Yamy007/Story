@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.contrib import auth
 from string import punctuation
 from django.http import JsonResponse
+from rest_framework.response import Response
 # from profanity_filter import ProfanityFilter
 
 @method_decorator(csrf_protect, name='dispatch')
@@ -14,11 +15,11 @@ class CheckAuthenticationStatus(APIView):
     def get(self, request, format=None):
         try:
             if request.user.is_authenticated:
-                return JsonResponse({'true':'User is authenticated'})
+                return JsonResponse({'response': True})
             else:
-                return JsonResponse({'false':'User is not authenticated'})
+                return JsonResponse({'response': False})
         except:
-            return JsonResponse({'error':'something went wrong during authentication check'})
+            return JsonResponse({'response':'something went wrong during authentication check'})
         
         
 @method_decorator(csrf_protect, name='dispatch')
@@ -42,21 +43,21 @@ class SignUpView(APIView):
         try:
             if password == re_password:
                 if User.objects.filter(username=username).exists():
-                    return JsonResponse({'error':'account with that username already exists'}, safe=False)
+                    return JsonResponse({'response': 'account with that username already exists'}, safe=False)
                 if len(password) < 8:
-                    return JsonResponse({'error':'password is too short'}, safe=False)
+                    return JsonResponse({'response': 'password is too short'}, safe=False)
                 if User.objects.filter(email=email).exists():
-                    return JsonResponse({'error': 'account with that email already exists'}, safe=False)
+                    return JsonResponse({'response': 'account with that email already exists'}, safe=False)
                 if username in password:
-                    return JsonResponse({'error': 'password cannot contain part of username'}, safe=False)
+                    return JsonResponse({'response': 'password cannot contain part of username'}, safe=False)
                 if password in username:
-                    return JsonResponse({'error': 'password cannot be part of username'}, safe=False)
+                    return JsonResponse({'response': 'password cannot be part of username'}, safe=False)
                 if any(symbol in password for symbol in set(punctuation)):
-                    return JsonResponse({'error': 'password cannot contain special symbols'}, safe=False)
+                    return JsonResponse({'response': 'password cannot contain special symbols'}, safe=False)
                 if password.isnumeric():
-                    return JsonResponse({'error':'password cannot be entirely numeric'}, safe=False)
+                    return JsonResponse({'response': 'password cannot be entirely numeric'}, safe=False)
                 # if pf.is_profane(username):
-                #     return JsonResponse({'error':'username cannot contain bad words'}, safe=False)
+                #     return JsonResponse({'response':'username cannot contain bad words'}, safe=False)
                 
                 user = User.objects.create_user(username=username, password=password, email=email)
                 user.save()
@@ -68,9 +69,9 @@ class SignUpView(APIView):
                     upd_user_status.is_admin = True
                     upd_user_status.save()
             else:
-                return JsonResponse({'error':'passwords do not match'}, safe=False)
+                return JsonResponse({'response': 'passwords do not match'}, safe=False)
         except:
-            return JsonResponse({'error':'something went wrong during registration'}, safe=False)     
+            return JsonResponse({'response': False}, safe=False)     
         
         try: 
             user_profile = UserProfile(user=upd_user_status, email=email)
@@ -78,11 +79,11 @@ class SignUpView(APIView):
             if superuser_secret_word == "isjxynasygaszgnxiasnuiqweruqiwe120942190142osidjadskamf":
                 user_profile.is_premium = True
                 user_profile.save()
-            return JsonResponse({'success':'account created'}, safe=False)  
+            return JsonResponse({'response':True}, safe=False)  
         except:
             delete_user = User.objects.get(pk=upd_user_status.id)
             delete_user.delete()
-            return JsonResponse({'error':'something went wrong during creation of profile'}, safe=False)
+            return JsonResponse({'response': False}, safe=False)
            
         
  
@@ -100,11 +101,11 @@ class LoginView(APIView):
             
             if user is not None:
                 auth.login(request, user)
-                return JsonResponse({'success': 'logged in'}, safe=False)
+                return JsonResponse({'response': True}, safe=False)
             else:
-                return JsonResponse({'error':'error during loging in'}, safe=False)
+                return JsonResponse({'response': False}, safe=False)
         except:
-            return JsonResponse({'error':'something went wrong during logination'}, safe=False)
+            return JsonResponse({'response': False}, safe=False)
 
 @method_decorator(csrf_protect, name='dispatch')       
 class LogoutView(APIView):
@@ -113,9 +114,9 @@ class LogoutView(APIView):
     def post(self, request, format=None):
         try:
             auth.logout(request)
-            return JsonResponse({'success':'logged out'}, safe=False)
+            return JsonResponse({'response': True}, safe=False)
         except:
-            return JsonResponse({'error':'error when logging OUT'}, safe=False)   
+            return JsonResponse({'response': False}, safe=False)   
         
          
 @method_decorator(ensure_csrf_cookie, name='dispatch')       
@@ -123,7 +124,7 @@ class GetCSRF(APIView):
     permission_classes = (permissions.AllowAny,)
     
     def get(self, request, format=None):
-        return JsonResponse({'csrfToken': "OK"}, safe=False)
+        return JsonResponse({'response': True}, safe=False)
     
 
 class GetUsersView(APIView):
