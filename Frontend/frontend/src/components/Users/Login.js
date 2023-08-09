@@ -22,6 +22,7 @@ export const Login = ({ onSave }) => {
 		fetch('http://localhost:8000/auth/get_all_users')
 			.then(res => res.json())
 			.then(res => setData(res))
+			.catch(err => console.log(err))
 	}, [onSave])
 
 	let redirect = useNavigate()
