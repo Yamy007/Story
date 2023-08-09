@@ -50,6 +50,12 @@ class UpdateUserProfile(APIView):
         # pf.censor_char = '*'
         data = self.request.data
         user_id = self.request.user.id
+        try:
+            thumbnail = request.FILES['image']
+            update_user_picture = UserProfile.objects.get(user__id = user_id)
+        except:
+            return JsonResponse({'error': 'didnt update the profile picture'})
+            
         
         try:
             first_name = data['first_name']
