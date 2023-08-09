@@ -12,8 +12,7 @@ export const Home = () => {
 		const check = async () => {
 			const response = await UserAuth().check()
 			console.log(response)
-			console.log(Object.keys(response.data)[0])
-			setIsAuth(Object.keys(response.data)[0])
+			setIsAuth(response.data ? Object.keys(response.data)[0] : null)
 		}
 		check()
 	}, [isAuth, save])

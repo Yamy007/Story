@@ -13,11 +13,30 @@ import Tooltip from '@mui/material/Tooltip'
 import MenuItem from '@mui/material/MenuItem'
 import { FormControlLabel, Switch } from '@mui/material'
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
-const pages = ['Home', 'Story', 'Blog']
-const settings = ['Settings', 'Logout']
+import { Logout } from '../Users/Logout'
 
-export const Header = ({ isDark, setIsDark }) => {
+import { UserAuth } from '../api/user'
+
+export const Header = ({ isDark, setIsDark, save }) => {
+	const [isAuth, setIsAuth] = useState(false)
+
+	useEffect(() => {
+		const check = async () => {
+			const response = await UserAuth().check()
+			console.log(response)
+			setIsAuth(response.data ? Object.keys(response.data)[0] : null)
+		}
+		check()
+	}, [isAuth, save])
+
+	const pages = ['Home', 'Story', 'Blog']
+	const settings =
+		isAuth !== 'false'
+			? ['Settings', 'Logout']
+			: ['Settings', 'Register', 'Login']
+
 	const [anchorElNav, setAnchorElNav] = React.useState(null)
 	const [anchorElUser, setAnchorElUser] = React.useState(null)
 
