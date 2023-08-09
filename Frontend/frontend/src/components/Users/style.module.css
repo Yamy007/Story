@@ -1,0 +1,8 @@
+.wrapper {
+	width: 50vw;
+	height: 35vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}

@@ -38,13 +38,13 @@ class Story(models.Model):
     def serialize(self):
         return {
             "story_id":self.id,
-            "creator_user_id":self.creator_id.id,
+            "creator_user_id":self.creator_id,
             "title": self.title,
             "story_body": self.story_body,
             "liked_by": [user.id for user in self.liked_by.all()],
             "date": self.date,
             "comments": [comment.id for comment in self.comments.all()],
-            "genres": [genre.genre for genre in self.genres.all()],
+            "genres": [genre.id for genre in self.genres.all()],
             "views": self.views,
             "archivation_state": self.archived,
         }
@@ -60,7 +60,7 @@ class Comments(models.Model):
         return self
     
     def __str__(self) -> str:
-        return f"{self.user_id}, {self.id}"
+        return f"{self.creator}, {self.id}"
 
     def serialize(self):
         return {

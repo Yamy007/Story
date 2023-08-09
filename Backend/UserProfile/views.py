@@ -2,12 +2,14 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 from logingAPI.models import *
+from backend.models import *
 from .serializer import *
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from django.http import JsonResponse
 from string import punctuation
 import re
+from django.core.paginator import Paginator
 #from profanity_filter import ProfanityFilter
 
     # user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
@@ -23,6 +25,7 @@ class GetUserProfilesView(APIView):
     permission_classes = (permissions.AllowAny,)
     
     def get(self, request, format=None):
+<<<<<<< HEAD
         isPremium = request.GET.get('premium', 2)
         try:
             users = None
@@ -36,6 +39,12 @@ class GetUserProfilesView(APIView):
             users = UserProfile.objects.filter(is_premium = True)
         if isPremium == 0:
             users = UserProfile.objects.filter(is_premium = False)
+=======
+        isPremium = request.GET.get('premium')
+        choices= {1:UserProfile.objects.filter(is_premium=True),
+                  0:UserProfile.objects.filter(is_premium=False),
+                  None:UserProfile.objects.all()}
+>>>>>>> main
         
             
         if users: 
@@ -45,7 +54,7 @@ class GetUserProfilesView(APIView):
             return JsonResponse({'error':'premium takes only 1,2,0 as parameters'})
    
     
-@method_decorator(csrf_protect, name='dispatch')   
+#@method_decorator(csrf_protect, name='dispatch')   
 class UpdateUserProfile(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
@@ -131,3 +140,35 @@ class UpdateUserProfile(APIView):
             
         return JsonResponse({'success': 'user profile successfully updated'})     
             
+#@method_decorator(csrf_protect, name='dispatch')   
+class GetUserProfilePage(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def get(self, request, format=None):
+        user = self.request.user
+        
+        liked_stories = Story.objects.filter(liked_by__id = user.id).count()
+        user_profile = UserProfile.objects.get(user__id = user.id)
+        
+        response = {
+            "status_is_premium": user_profile.is_premium,
+            "first_name": user_profile.first_name,
+            "last_name": user_profile.last_name,
+            "email": user_profile.email,
+            "phone": user_profile.phone,
+            "address": user_profile.address,
+            "bio": user_profile.bio,
+            "number_of_likes": liked_stories,
+        }
+        
+        return JsonResponse(response, safe=False)
+    
+class GetUserLikedPosts(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def get(self, request, format=None):
+        user = self.request.user
+        
+        liked_posts = Story.objects.filter(liked_by__id = user.id).order_by('-views').distinct()
+        
+        
