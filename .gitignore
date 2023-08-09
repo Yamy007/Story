@@ -8,3 +8,5 @@ Backend/backend/__pycache__
 Backend/backend/__pycache__
 AppBackend/__pycache__/
 AppBackend/__pycache__
+
+*.pyc
