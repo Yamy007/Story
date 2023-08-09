@@ -12,20 +12,11 @@ import re
 from django.core.paginator import Paginator
 #from profanity_filter import ProfanityFilter
 
-    # user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-    # is_premium = models.BooleanField(default=False)
-    # first_name = models.CharField(default='', max_length=100)
-    # last_name = models.CharField(default='', max_length=100)
-    # email = models.EmailField(default='', max_length=100)
-    # phone = models.CharField(default='', max_length=100)
-    # address = models.CharField(default='', max_length=100)
-    # bio = models.TextField(default='', max_length=10000)
 
 class GetUserProfilesView(APIView):
     permission_classes = (permissions.AllowAny,)
     
     def get(self, request, format=None):
-<<<<<<< HEAD
         isPremium = request.GET.get('premium', 2)
         try:
             users = None
@@ -39,12 +30,6 @@ class GetUserProfilesView(APIView):
             users = UserProfile.objects.filter(is_premium = True)
         if isPremium == 0:
             users = UserProfile.objects.filter(is_premium = False)
-=======
-        isPremium = request.GET.get('premium')
-        choices= {1:UserProfile.objects.filter(is_premium=True),
-                  0:UserProfile.objects.filter(is_premium=False),
-                  None:UserProfile.objects.all()}
->>>>>>> main
         
             
         if users: 
@@ -54,7 +39,7 @@ class GetUserProfilesView(APIView):
             return JsonResponse({'error':'premium takes only 1,2,0 as parameters'})
    
     
-#@method_decorator(csrf_protect, name='dispatch')   
+@method_decorator(csrf_protect, name='dispatch')   
 class UpdateUserProfile(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
@@ -140,7 +125,7 @@ class UpdateUserProfile(APIView):
             
         return JsonResponse({'success': 'user profile successfully updated'})     
             
-#@method_decorator(csrf_protect, name='dispatch')   
+@method_decorator(csrf_protect, name='dispatch')   
 class GetUserProfilePage(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     

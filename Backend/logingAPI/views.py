@@ -86,32 +86,36 @@ class SignUpView(APIView):
            
         
  
-#@method_decorator(csrf_protect, name='dispatch')
-@api_view(['POST'])
-def Login(request):
-    data = request.data
-    try:
-        username = data['username']
-        password = data['password']
-        
-        user = auth.authenticate(username=username, password=password)
-        
-        if user is not None:
-            auth.login(request, user)
-            return JsonResponse({'success': 'logged in'}, safe=False)
-        else:
-            return JsonResponse({'error':'error during loging in'}, safe=False)
-    except:
-        return JsonResponse({'error':'something went wrong during logination'}, safe=False)
+@method_decorator(csrf_protect, name='dispatch')
+class LoginView(APIView):
+    permission_classes = (permissions.AllowAny,)
     
-@api_view(['POST'])      
-def Logout(request):
-    try:
-        auth_logout(request)
-        return JsonResponse({'success':'logged out'}, safe=False)
-    except:
-        return JsonResponse({'error':'error when logging OUT'}, safe=False)   
-    
+    def post(self, request, format=None):
+        data = self.request.data
+        try:
+            username = data['username']
+            password = data['password']
+            
+            user = auth.authenticate(username=username, password=password)
+            
+            if user is not None:
+                auth.login(request, user)
+                return JsonResponse({'success': 'logged in'}, safe=False)
+            else:
+                return JsonResponse({'error':'error during loging in'}, safe=False)
+        except:
+            return JsonResponse({'error':'something went wrong during logination'}, safe=False)
+        
+class LogoutView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, format=None):
+        try:
+            auth.logout(request)
+            return JsonResponse({'success':'logged out'}, safe=False)
+        except:
+            return JsonResponse({'error':'error when logging OUT'}, safe=False)   
+        
          
 @method_decorator(ensure_csrf_cookie, name='dispatch')       
 class GetCSRF(APIView):
@@ -120,6 +124,9 @@ class GetCSRF(APIView):
     def get(self, request, format=None):
         return JsonResponse({'csrfToken': "OK"}, safe=False)
     
+
+class GetUsersView(APIView):
+    permission_classes = (permissions.AllowAny,)
     
     def get(self, request, format=None):
         users = User.objects.all()
