@@ -1,58 +1,69 @@
-import React, {useState} from 'react';
-
-
-export const Home = ({ isDark, setIsDark }) => {
-	const [username, setUsername] = useState('');
-	const [password, setPassword] = useState('');
-	const API_HOST = 'http://127.0.0.1:8000';
-
-	let _csrfToken = null;
-
-	async function getCsrfToken() {
-	if (_csrfToken === null) {
-		const response = await fetch(`${API_HOST}/auth/csrf_cookie`, {
-		credentials: 'include',
-		});
-		const data = await response.json();
-		_csrfToken = data.csrfToken;
+import React from 'react'
+import axios from 'axios'
+import { Box, Button } from '@mui/material'
+import Cookies from 'js-cookie'
+function Home() {
+	const checkCookie = () => {
+		axios
+			.get('http://localhost:8000/auth/csrf_cookie', { withCredentials: true })
+			.then(res => console.log(res))
+			.catch(err => console.log(err))
 	}
-	return _csrfToken;
+	const login = () => {
+		axios
+			.post(
+				'http://localhost:8000/auth/login',
+				{ username: 'tester1', password: 'pogkopi2004' },
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'X-CSRFToken': Cookies.get('csrftoken'),
+					},
+					withCredentials: true,
+				}
+			)
+			.then(res => console.log(res))
+			.catch(err => console.log(err))
 	}
-  
-	const handlePasswordChange = (event) => {
-		setPassword(event.target.value);
-	  };
+	const check = () => {
+		axios
+			.get('http://localhost:8000/auth/auth_check', { withCredentials: true })
+			.then(res => console.log(res))
+			.catch(err => console.log(err))
+	}
 
-	const handleUsernameChange = (event) => {
-		setUsername(event.target.value);
-	};
-
-	const handleSubmit = async (username, password) => {
-		const requestOptions = {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json',
-					'X-CSRFToken': await getCsrfToken()},
-			body: JSON.stringify({
-				"username":username,
-				"password":password
-			})
-		};
-		const response = await fetch(`${API_HOST}/auth/login`, requestOptions);
-		const data = await response.json();
-		console.log(data)
-
-	};
+	const logout = () => {
+		axios
+			.post(
+				'http://localhost:8000/auth/logout',
+				{},
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'X-CSRFToken': Cookies.get('csrftoken'),
+					},
+					withCredentials: true,
+				}
+			)
+			.then(res => console.log(res))
+			.catch(err => console.log(err))
+	}
 	return (
-		<form onSubmit={handleSubmit}>
-			<label>
-			Username:
-			<input type="text" value={username} onChange={handleUsernameChange} />
-			</label>
-			<label>
-			Password:
-			<input type="password" value={password} onChange={handlePasswordChange} />
-			</label>
-			<button type="submit">Submit</button>
-		</form>
+		<Box sx={{ paddingTop: '10vh' }}>
+			<Button variant='outlined' onClick={checkCookie}>
+				check Cookie
+			</Button>
+			<Button variant='contained' onClick={login}>
+				login
+			</Button>
+			<Button variant='text' onClick={check}>
+				Check
+			</Button>
+			<Button variant='outlined' onClick={logout}>
+				Logout
+			</Button>
+		</Box>
 	)
 }
+
+export { Home }
