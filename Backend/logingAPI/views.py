@@ -105,7 +105,8 @@ class LoginView(APIView):
                 return JsonResponse({'error':'error during loging in'}, safe=False)
         except:
             return JsonResponse({'error':'something went wrong during logination'}, safe=False)
-        
+
+@method_decorator(csrf_protect, name='dispatch')       
 class LogoutView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
