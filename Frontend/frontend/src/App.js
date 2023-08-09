@@ -6,17 +6,20 @@ import { darkTheme } from './Theme/darkTheme'
 import { lightTheme } from './Theme/lightTheme'
 import { Header } from './components/Home/Header'
 import { Storys } from './components/Story/Storys'
-import { Box } from '@mui/material'
 import { StoryInfo } from './components/Story/StoryInfo'
-import { Color } from './components/ColorGenre/Color'
 import { Login } from './components/Users/Login'
-import { Logout } from './components/Users/Logout'
+import { Register } from './components/Users/Register'
 function App() {
 	const [isDark, setIsDark] = useState(true)
 	const [save, onSave] = useState(false)
 	return (
 		<ThemeProvider theme={isDark ? darkTheme : lightTheme}>
-			<Header isDark={isDark} setIsDark={setIsDark} save={save} />
+			<Header
+				isDark={isDark}
+				setIsDark={setIsDark}
+				save={save}
+				onSave={onSave}
+			/>
 			<Routes>
 				<Route
 					path='/'
@@ -32,13 +35,13 @@ function App() {
 				></Route>
 
 				<Route
-					path='user/login'
+					path='/user/login'
 					element={<Login isDark={isDark} onSave={onSave} />}
 				></Route>
 
 				<Route
-					path='user/register'
-					element={<Logout isDark={isDark} onSave={onSave} />}
+					path='/user/register'
+					element={<Register isDark={isDark} onSave={onSave} />}
 				></Route>
 			</Routes>
 		</ThemeProvider>
