@@ -10,3 +10,8 @@ AppBackend/__pycache__/
 AppBackend/__pycache__
 
 *.pyc
+
+AppBackend/__pycache__/
+backend/__pycache__/
+backend/migrations/__pycache__/
+
