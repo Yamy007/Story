@@ -12,12 +12,28 @@ import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import MenuItem from '@mui/material/MenuItem'
 import { FormControlLabel, Switch } from '@mui/material'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Logout } from '../Users/Logout'
+import { useNavigate } from 'react-router-dom'
+import { UserAuth } from '../api/user'
 
-const pages = ['Home', 'Story', 'Blog']
-const settings = ['Settings', 'Logout']
+export const Header = ({ isDark, setIsDark, save, onSave }) => {
+	const [isAuth, setIsAuth] = useState(false)
+	let redirect = useNavigate()
 
-export const Header = ({ isDark, setIsDark }) => {
+	useEffect(() => {
+		const check = async () => {
+			const response = await UserAuth().check()
+			console.log(response)
+			setIsAuth(response?.data.response)
+		}
+		check()
+	}, [isAuth, save])
+	console.log(save)
+	const pages = ['Home', 'Story', 'Blog']
+	const settings = isAuth ? ['Settings', 'Logout'] : ['Register', 'Login']
+
 	const [anchorElNav, setAnchorElNav] = React.useState(null)
 	const [anchorElUser, setAnchorElUser] = React.useState(null)
 
@@ -35,9 +51,29 @@ export const Header = ({ isDark, setIsDark }) => {
 	const handleCloseUserMenu = () => {
 		setAnchorElUser(null)
 	}
-
+	const Action = type => {
+		if (type === 'Logout') {
+			onSave(prev => !prev)
+			Logout()
+		}
+		if (type === 'Register') {
+			return redirect('/user/register')
+		}
+		if (type === 'Login') {
+			console.log('login')
+			return redirect('/user/login')
+		}
+	}
 	return (
-		<AppBar position='fixed' sx={{ height: '8vh' }}>
+		<AppBar
+			position='fixed'
+			sx={{
+				height: '8vh',
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+			}}
+		>
 			<Container maxWidth='xl'>
 				<Toolbar disableGutters>
 					<Typography
@@ -138,36 +174,53 @@ export const Header = ({ isDark, setIsDark }) => {
 						}
 						label={isDark ? 'Dark' : 'Light'}
 					/>
-
-					<Box sx={{ flexGrow: 0 }}>
-						<Tooltip title='Open settings'>
-							<IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-								<Avatar alt='Remy Sharp' src='/static/images/avatar/2.jpg' />
-							</IconButton>
-						</Tooltip>
-						<Menu
-							sx={{ mt: '45px' }}
-							id='menu-appbar'
-							anchorEl={anchorElUser}
-							anchorOrigin={{
-								vertical: 'top',
-								horizontal: 'right',
-							}}
-							keepMounted
-							transformOrigin={{
-								vertical: 'top',
-								horizontal: 'right',
-							}}
-							open={Boolean(anchorElUser)}
-							onClose={handleCloseUserMenu}
-						>
-							{settings.map(setting => (
-								<MenuItem key={setting} onClick={handleCloseUserMenu}>
-									<Typography textAlign='center'>{setting}</Typography>
-								</MenuItem>
+					{isAuth ? (
+						<Box sx={{ flexGrow: 0 }}>
+							<Tooltip title='Open settings'>
+								<IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+									<Avatar alt='Remy Sharp' src='/static/images/avatar/2.jpg' />
+								</IconButton>
+							</Tooltip>
+							<Menu
+								sx={{ mt: '45px' }}
+								id='menu-appbar'
+								anchorEl={anchorElUser}
+								anchorOrigin={{
+									vertical: 'top',
+									horizontal: 'right',
+								}}
+								keepMounted
+								transformOrigin={{
+									vertical: 'top',
+									horizontal: 'right',
+								}}
+								open={Boolean(anchorElUser)}
+								onClose={handleCloseUserMenu}
+							>
+								{settings.map(setting => (
+									<MenuItem key={setting} onClick={handleCloseUserMenu}>
+										<Button color='warning' onClick={() => Action(setting)}>
+											{setting}
+										</Button>
+									</MenuItem>
+								))}
+							</Menu>
+						</Box>
+					) : (
+						<Box sx={{ flexGrow: 0 }}>
+							{settings.map((setting, idx) => (
+								<Button
+									color='warning'
+									variant='outlined'
+									sx={{ margin: '5px' }}
+									key={idx}
+									onClick={() => Action(setting)}
+								>
+									{setting}
+								</Button>
 							))}
-						</Menu>
-					</Box>
+						</Box>
+					)}
 				</Toolbar>
 			</Container>
 		</AppBar>
