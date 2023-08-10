@@ -133,3 +133,11 @@ class GetUsersView(APIView):
         users = User.objects.all()
         return JsonResponse([user.username for user in users], safe=False)
     
+@method_decorator(csrf_protect, name='dispatch')
+class GetUsersViewALL(APIView):
+    #permission_classes = (permissions.IsAuthenticated,)
+    
+    def get(self, request, format=None):
+        users = User.objects.all()
+        users = UserSerializer(users, many=True)
+        return JsonResponse(users.data, safe=False)
