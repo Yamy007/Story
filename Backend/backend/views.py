@@ -10,7 +10,7 @@ from django.db.models import Count
 
 def get_genre_for_Yaroslav(request):
     all_genres = Genre.objects.all()
-    return JsonResponse([genre.serialize() for genre in all_genres], safe=False)
+    return JsonResponse([genre.serialize() for genre in all_genres])
 
 class GetFilteredStories(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -21,58 +21,128 @@ class GetFilteredStories(APIView):
         views = request.GET.get("views", None)
         likes = request.GET.get("likes", None)
         date = request.GET.get("date", None)
+        comments = request.GET.get("comments", None)
+        search = request.GET.get("search_request", None)
         
-        if not genre:
-            if views == "True":
-                all_posts = Story.objects.all().order_by('-views').distinct()
-            elif views == "False":
-                all_posts = Story.objects.all().order_by('views').distinct()
-            elif likes == "True":
-                all_posts = Story.objects.annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
-            elif likes == "False":
-                all_posts = Story.objects.annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
-            elif date == "True":
-                all_posts = Story.objects.all().order_by('-date').distinct()
-            elif date == "False":
-                all_posts = Story.objects.all().order_by('date').distinct()
-            else:
-                all_posts = Story.objects.all().distinct()
-            paginated = Paginator(all_posts, per_page=10)
-            page_obj = paginated.get_page(page_number)
-            
-        
-        if genre:
-            filter_genre = genre.split(",")
-            if views == "True":
-                all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('-views').distinct()
-            elif views == "False":
-                all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('views').distinct()
-            elif likes == "True":
-                all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
-            elif likes == "False":
-                all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
-            elif date == "True":
-                all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('-date').distinct()
-            elif date == "False":
-                all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('date').distinct()
-            else:
-                all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).distinct()
-            paginated = Paginator(all_posts, per_page=10)
-            page_obj = paginated.get_page(page_number)
-        
-        
-        response = {
-                "page": {
-                    "current": page_obj.number,
-                    "has_next": page_obj.has_next(),
-                    "has_previous": page_obj.has_previous(),
-                    "number_of_pages": paginated.num_pages,
-                    "number_of_stories": paginated.count
-                },
-                "data": [story.serialize_general() for story in page_obj.object_list],
+        if search:
+            if not genre:
+                if views == "True":
+                    all_posts = Story.objects.filter(title__icontains = search).order_by('-views').distinct()
+                elif views == "False":
+                    all_posts = Story.objects.filter(title__icontains = search).order_by('views').distinct()
+                elif likes == "True":
+                    all_posts = Story.objects.filter(title__icontains = search).annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
+                elif likes == "False":
+                    all_posts = Story.objects.filter(title__icontains = search).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
+                elif date == "True":
+                    all_posts = Story.objects.filter(title__icontains = search).order_by('-date').distinct()
+                elif date == "False":
+                    all_posts = Story.objects.filter(title__icontains = search).order_by('date').distinct()
+                elif comments == "True":
+                    all_posts = Story.objects.filter(title__icontains = search).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
+                elif comments == "False":
+                    all_posts = Story.objects.filter(title__icontains = search).annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
+                else:
+                    all_posts = Story.objects.filter(title__icontains = search).distinct()
+                paginated = Paginator(all_posts, per_page=10)
+                page_obj = paginated.get_page(page_number)
                 
+            
+            if genre:
+                filter_genre = genre.split(",")
+                if views == "True":
+                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).order_by('-views').distinct()
+                elif views == "False":
+                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).order_by('views').distinct()
+                elif likes == "True":
+                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
+                elif likes == "False":
+                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
+                elif date == "True":
+                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).order_by('-date').distinct()
+                elif date == "False":
+                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).order_by('date').distinct()
+                elif comments == "True":
+                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
+                elif comments == "False":
+                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
+                else:
+                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).distinct()
+                paginated = Paginator(all_posts, per_page=10)
+                page_obj = paginated.get_page(page_number)
+        else:
+            if not genre:
+                if views == "True":
+                    all_posts = Story.objects.all().order_by('-views').distinct()
+                elif views == "False":
+                    all_posts = Story.objects.all().order_by('views').distinct()
+                elif likes == "True":
+                    all_posts = Story.objects.annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
+                elif likes == "False":
+                    all_posts = Story.objects.annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
+                elif date == "True":
+                    all_posts = Story.objects.all().order_by('-date').distinct()
+                elif date == "False":
+                    all_posts = Story.objects.all().order_by('date').distinct()
+                elif comments == "True":
+                    all_posts = Story.objects.annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
+                elif comments == "False":
+                    all_posts = Story.objects.annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
+                else:
+                    all_posts = Story.objects.all().distinct()
+                paginated = Paginator(all_posts, per_page=10)
+                page_obj = paginated.get_page(page_number)
+                
+            
+            if genre:
+                filter_genre = genre.split(",")
+                if views == "True":
+                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('-views').distinct()
+                elif views == "False":
+                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('views').distinct()
+                elif likes == "True":
+                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
+                elif likes == "False":
+                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
+                elif date == "True":
+                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('-date').distinct()
+                elif date == "False":
+                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('date').distinct()
+                elif comments == "True":
+                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
+                elif comments == "False":
+                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
+                else:
+                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).distinct()
+                
+        
+        if all_posts:
+            search_response = [story.serialize_general() for story in page_obj.object_list]
+            paginated = Paginator(all_posts, per_page=10)
+            page_obj = paginated.get_page(page_number) 
+            response = {
+                    "page": {
+                        "current": page_obj.number,
+                        "has_next": page_obj.has_next(),
+                        "has_previous": page_obj.has_previous(),
+                        "number_of_pages": paginated.num_pages,
+                        "number_of_stories": paginated.count
+                    },
+                    "data": search_response,
+                    
+                }
+            return JsonResponse(response)
+        else:
+            search_response = 'nothing was found :('
+            all_posts = Story.objects.all().order_by('-date').distinct()
+            paginated = Paginator(all_posts, per_page=5)
+            page_obj = paginated.get_page(1)
+            response = {
+                "response":search_response,
+                "recommendations": [story.serialize_general() for story in page_obj.object_list]
             }
-        return JsonResponse(response, safe=False)
+            return JsonResponse(response)
+        
 
 class GetDistinctStoryPage(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -107,7 +177,7 @@ class GetDistinctStoryPage(APIView):
                     "body":page_story_obj.object_list,
                 }
             }
-            return JsonResponse(response, safe=False)
+            return JsonResponse(response)
 
 class GetDistinctRelatedStoriesPage(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -131,7 +201,7 @@ class GetDistinctRelatedStoriesPage(APIView):
                 },
                 "related": [related_stories.serialize_general() for related_stories in page_obj.object_list if related_stories != story],
             }
-            return JsonResponse(response, safe=False)
+            return JsonResponse(response)
         else:
             return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
         
@@ -146,14 +216,26 @@ class GetStoryCommentsPage(APIView):
             story = Story.objects.get(pk=story_id)
             paginated = Paginator(story.comments.all(), per_page=10)
             page_obj = paginated.get_page(comments_page)
-            response = [comments.serialize() for comments in page_obj.object_list]
+            response = [comments.serialize() for comments in page_obj.object_list if comments.replied_to == 0]
             return JsonResponse(response, safe = False)
         else:
             return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
         
     
+class GetStoryCommentsReplies(APIView):
+    permission_classes = (permissions.AllowAny,)
     
-    
+    def get(self, request, format=None):
+        data = self.request.data
+        try:
+            comment = data['reply_id']
+        except:
+            return JsonResponse({'response':'wrong input (missing "reply_id" in body)'})
+
+        replies = Comments.objects.filter(replied_to = comment)
+        response = [reply.serialize() for reply in replies]
+        
+        return JsonResponse(response)
     
        
 def test_plug_func(request):

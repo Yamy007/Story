@@ -11,5 +11,8 @@ urlpatterns = [
     
     path('create_story', CreateUserStory.as_view()),
     path('create_comment', CreateUserComment.as_view()),
+    path('like_story', LikeUnlikeStory.as_view()),
+    path('like_comment', LikeUnlikeComment.as_view()),
+    path('comment_story_or_reply_to_comment', CommentStoryOrReplyToComment.as_view()),
 
 ]

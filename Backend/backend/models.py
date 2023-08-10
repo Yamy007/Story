@@ -83,7 +83,7 @@ class Comments(models.Model):
             "creator_user_id":self.creator,
             "comment_body": self.comment_body,
             "replied_to_id": self.replied_to,
-            "liked_by": [user.id for user in self.liked_by.all()],
+            "liked_by": self.liked_by.all().count(),
             "number_of_replies": Comments.objects.filter(replied_to = self.id).count()
         }
     def serialize_profile(self):
@@ -95,7 +95,7 @@ class Comments(models.Model):
             "creator_user_id":self.creator,
             "comment_body": self.comment_body,
             "replied_to_id": self.replied_to,
-            "liked_by": [user.id for user in self.liked_by.all()],
+            "liked_by": self.liked_by.all().count(),
             },
         'related_comment_story_data':{
             "story_id": related_story.id,

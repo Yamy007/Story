@@ -17,7 +17,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 class GetUserProfilesView(APIView):
     permission_classes = (permissions.AllowAny,)
     
-    def get(self, request, format=None):
+    def post(self, request, format=None):
         isPremium = request.GET.get('premium', 2)
         try:
             users = None
@@ -35,7 +35,7 @@ class GetUserProfilesView(APIView):
             
         if users: 
             users = UserProfileSerializer(users, many=True)
-            return JsonResponse(users.data, safe=False)
+            return JsonResponse(users.data)
         else:
             return JsonResponse({'error':'premium takes only 1,2,0 as parameters'})
    
@@ -172,7 +172,7 @@ class GetUserProfilePage(APIView):
             "liked_stories": liked_stories,
             "number_of_comments_made_by_user": comments_made,
         }
-        return JsonResponse(jsonresponse, safe=False)
+        return JsonResponse(jsonresponse)
     
 
 class GetUserLikedPosts(APIView):
@@ -195,7 +195,7 @@ class GetUserLikedPosts(APIView):
             "liked_stories_data":[post.serialize_profile() for post in liked_posts]
                 
         }
-        return JsonResponse(response, safe=False)
+        return JsonResponse(response)
     
 class CreateUserComment(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -235,7 +235,7 @@ class GetUser_MadeComments(APIView):
         response = {
             'comments':[comment.serialize_profile() for comment in comments]
         }
-        return JsonResponse(response, safe=False)
+        return JsonResponse(response)
     
 class CreateUserStory(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -285,4 +285,78 @@ class GetUser_MadeStories(APIView):
         
         user_stories = Story.objects.filter(creator_id = user)
         response = [story.serialize_profile() for story in user_stories]
-        return JsonResponse(response, safe=False)
+        return JsonResponse(response)
+
+class LikeUnlikeStory(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def post(self, request, format=None):
+        user = self.request.user.id
+        
+        story_id = request.GET.get('story', None)
+        
+        if story_id:
+            story = Story.objects.get(pk = story_id)
+            if Story.objects.filter(pk = story_id, liked_by = user).exists():
+                story.liked_by.remove(user)
+            else:
+                story.liked_by.add(user)
+            
+            return JsonResponse({'response':'like func success'})
+        else:
+            return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
+        
+class CommentStoryOrReplyToComment(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def post(self, request, format=None):
+        user = self.request.user.id
+        data = request.data
+        try:
+            story_id = data['story']
+        except:
+            return JsonResponse({'response':'wrong input (missing "story" key in body)'})
+        
+        try:
+            comment_body = data['comment']
+        except:
+            return JsonResponse({'response':'wrong input (missing "comment" key in body)'})
+        
+        try:
+            reply = data['reply']
+        except:
+            reply = None
+        
+        if story_id:
+            story = Story.objects.get(pk = story_id)
+            if reply:
+                create_comment = Comments(creator = user, comment_body=comment_body, replied_to = reply)
+            else:
+                create_comment = Comments(creator = user, comment_body=comment_body)
+                
+            create_comment.save()
+            if Story.objects.filter(pk = story_id, comments__creator = user).count() > 5:
+                return JsonResponse({'response':'comment wasnt added, only 5 comments per post available'})
+            else:
+                story.comments.add(create_comment)
+        else:
+            return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
+        
+        return JsonResponse({'response':'commented succesfully'})
+    
+class LikeUnlikeComment(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def post(self, request, format=None):
+        user = self.request.user.id
+        comment = request.GET.get('comment', None)
+        
+        if comment:
+            liked_comment = Comments.objects.get(pk = comment)
+            if Comments.objects.filter(pk = comment, liked_by=user).exists():
+                liked_comment.liked_by.remove(user)
+            else:
+                liked_comment.liked_by.add(user)
+            return JsonResponse({'response':'like comment func success'})
+        else:
+            return JsonResponse({'response':'wrong input (missing "comment" key in URL)'})
