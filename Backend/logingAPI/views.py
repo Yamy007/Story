@@ -131,7 +131,7 @@ class GetUsersView(APIView):
     
     def get(self, request, format=None):
         users = User.objects.all()
-        return JsonResponse([user.username for user in users])
+        return JsonResponse([user.username for user in users], safe=False)
     
 @method_decorator(csrf_protect, name='dispatch')
 class GetUsersViewALL(APIView):

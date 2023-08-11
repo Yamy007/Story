@@ -9,6 +9,7 @@ urlpatterns = [
     path("get_related", GetDistinctRelatedStoriesPage.as_view()),
     path("get_story_comments", GetStoryCommentsPage.as_view()),
     path("get_story_comments_replies", GetStoryCommentsReplies.as_view()),
+    path("set_view", SetViewForStory.as_view()),
     
     path("plug_URL", test_plug_func),
     

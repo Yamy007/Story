@@ -10,7 +10,7 @@ from django.db.models import Count
 
 def get_genre_for_Yaroslav(request):
     all_genres = Genre.objects.all()
-    return JsonResponse([genre.serialize() for genre in all_genres])
+    return JsonResponse([genre.serialize() for genre in all_genres], safe=False)
 
 class GetFilteredStories(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -226,18 +226,31 @@ class GetStoryCommentsReplies(APIView):
     permission_classes = (permissions.AllowAny,)
     
     def get(self, request, format=None):
-        data = self.request.data
-        try:
-            comment = data['reply_id']
-        except:
-            return JsonResponse({'response':'wrong input (missing "reply_id" in body)'})
-
-        replies = Comments.objects.filter(replied_to = comment)
-        response = [reply.serialize() for reply in replies]
+        comment = request.GET.get('reply_id', None)
+        if comment:
+            replies = Comments.objects.filter(replied_to = comment)
+            response = [reply.serialize() for reply in replies]
         
-        return JsonResponse(response)
+            return JsonResponse(response, safe=False)
+        else:
+            return JsonResponse({'response':'wrong input (missing "reply_id" key in URL)'}) 
     
-       
+class SetViewForStory(APIView):
+    permission_classes = (permissions.AllowAny,)
+    
+    def get(self, request, format=None):
+        story = request.GET.get('story', None)
+        
+        if story:
+            get_story = Story.objects.get(pk=story)
+            get_story.views += 1
+            get_story.save()
+            return JsonResponse({'response':'view set'})
+        else:
+            return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
+        
+        
+           
 def test_plug_func(request):
     comment = Comments(creator=request.user.id, comment_body="nice story bro")
     comment.save()
