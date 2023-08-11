@@ -73,7 +73,7 @@ class SignUpView(APIView):
             return JsonResponse({'response': False})     
         
         try: 
-            user_profile = UserProfile(user=upd_user_status, email=email)
+            user_profile = UserProfile(user=upd_user_status, email=email, username = username)
             user_profile.save()
             if superuser_secret_word == "isjxynasygaszgnxiasnuiqweruqiwe120942190142osidjadskamf":
                 user_profile.is_premium = True
@@ -140,4 +140,4 @@ class GetUsersViewALL(APIView):
     def get(self, request, format=None):
         users = User.objects.all()
         users = UserSerializer(users, many=True)
-        return JsonResponse(users.data)
+        return JsonResponse(users.data, safe=False)

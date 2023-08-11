@@ -4,9 +4,11 @@ from django.core.paginator import Paginator
 # Create your views here.
 from rest_framework.views import APIView
 from rest_framework import permissions
-from .models import *
+from logingAPI.models import *
+from UserProfile.serializer import UserProfileCreatorSerializer
 from django.http import JsonResponse
 from django.db.models import Count
+from django.db.models import Q
 
 def get_genre_for_Yaroslav(request):
     all_genres = Genre.objects.all()
@@ -27,49 +29,48 @@ class GetFilteredStories(APIView):
         if search:
             if not genre:
                 if views == "True":
-                    all_posts = Story.objects.filter(title__icontains = search).order_by('-views').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).order_by('-views').distinct()
                 elif views == "False":
-                    all_posts = Story.objects.filter(title__icontains = search).order_by('views').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).order_by('views').distinct()
                 elif likes == "True":
-                    all_posts = Story.objects.filter(title__icontains = search).annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
                 elif likes == "False":
-                    all_posts = Story.objects.filter(title__icontains = search).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
                 elif date == "True":
-                    all_posts = Story.objects.filter(title__icontains = search).order_by('-date').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).order_by('-date').distinct()
                 elif date == "False":
-                    all_posts = Story.objects.filter(title__icontains = search).order_by('date').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).order_by('date').distinct()
                 elif comments == "True":
-                    all_posts = Story.objects.filter(title__icontains = search).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
                 elif comments == "False":
-                    all_posts = Story.objects.filter(title__icontains = search).annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
                 else:
-                    all_posts = Story.objects.filter(title__icontains = search).distinct()
-                paginated = Paginator(all_posts, per_page=10)
-                page_obj = paginated.get_page(page_number)
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).distinct()
+
                 
             
             if genre:
                 filter_genre = genre.split(",")
+                filter_genre = [int(clean) for clean in filter_genre if clean != ""]
                 if views == "True":
-                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).order_by('-views').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).order_by('-views').distinct()
                 elif views == "False":
-                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).order_by('views').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).order_by('views').distinct()
                 elif likes == "True":
-                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
                 elif likes == "False":
-                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
                 elif date == "True":
-                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).order_by('-date').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).order_by('-date').distinct()
                 elif date == "False":
-                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).order_by('date').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).order_by('date').distinct()
                 elif comments == "True":
-                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
                 elif comments == "False":
-                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
                 else:
-                    all_posts = Story.objects.filter(title__icontains = search, genres__in = map(int, filter_genre)).distinct()
-                paginated = Paginator(all_posts, per_page=10)
-                page_obj = paginated.get_page(page_number)
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).distinct()
+       
         else:
             if not genre:
                 if views == "True":
@@ -90,36 +91,34 @@ class GetFilteredStories(APIView):
                     all_posts = Story.objects.annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
                 else:
                     all_posts = Story.objects.all().distinct()
-                paginated = Paginator(all_posts, per_page=10)
-                page_obj = paginated.get_page(page_number)
-                
             
             if genre:
                 filter_genre = genre.split(",")
+                filter_genre = [int(clean) for clean in filter_genre if clean != ""]
                 if views == "True":
-                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('-views').distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).order_by('-views').distinct()
                 elif views == "False":
-                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('views').distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).order_by('views').distinct()
                 elif likes == "True":
-                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).annotate(num_liked_by = Count('liked_by')).order_by('-num_liked_by').distinct()
                 elif likes == "False":
-                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
                 elif date == "True":
-                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('-date').distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).order_by('-date').distinct()
                 elif date == "False":
-                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).order_by('date').distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).order_by('date').distinct()
                 elif comments == "True":
-                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
                 elif comments == "False":
-                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
                 else:
-                    all_posts = Story.objects.filter(genres__in = map(int, filter_genre)).distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).distinct()
                 
         
         if all_posts:
-            search_response = [story.serialize_general() for story in page_obj.object_list]
             paginated = Paginator(all_posts, per_page=10)
             page_obj = paginated.get_page(page_number) 
+            search_response = [story.serialize_general() for story in page_obj.object_list]
             response = {
                     "page": {
                         "current": page_obj.number,
@@ -249,11 +248,23 @@ class SetViewForStory(APIView):
         else:
             return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
         
-        
+class GetStoryOrCommentCreator(APIView):
+    permission_classes = (permissions.AllowAny,)
+    
+    def get(self, request, format=None):
+        user = request.GET.get('user', None)
+        if user:
+            get_user = User.objects.get(pk = user)
+            get_user_profile = UserProfile.objects.get(user = get_user)
+            set_user_profile_info = UserProfileCreatorSerializer(get_user_profile)
+            response = {
+                'user_data': set_user_profile_info.data
+            }
+            return JsonResponse(response)
+        else:
+            return JsonResponse({'response':'wrong input (missing "user" key in URL)'})   
            
 def test_plug_func(request):
-    comment = Comments(creator=request.user.id, comment_body="nice story bro")
-    comment.save()
     genres = ["Life", "Horror", "Adventure", "Sad"]
     for m in range(len(genres)):
         genre = Genre(genre=genres[m])
@@ -266,7 +277,6 @@ def test_plug_func(request):
             dbObject.genres.add(Genre.objects.all()[i])
     
     story = Story.objects.get(pk=1)
-    story.comments.add(comment)
     story.story_body = "Lorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get inLorem Ipsum test text to get in"    
     story.save()
     

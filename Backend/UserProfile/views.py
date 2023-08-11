@@ -11,6 +11,7 @@ from string import punctuation
 import re
 from django.core.paginator import Paginator
 from django.utils.datastructures import MultiValueDictKeyError
+from django.db.models import Q
 #from profanity_filter import ProfanityFilter
 
 
@@ -18,26 +19,21 @@ class GetUserProfilesView(APIView):
     permission_classes = (permissions.AllowAny,)
     
     def post(self, request, format=None):
-        isPremium = request.GET.get('premium', 2)
-        try:
-            users = None
-            isPremium = int(isPremium)
-        except:
-            return JsonResponse({'error':'wrong premium input value'})
+        isPremium = request.GET.get('premium', None)
         
-        if isPremium == 2:
+        if not isPremium:
             users = UserProfile.objects.all()
-        if isPremium == 1:
+        if isPremium == "True":
             users = UserProfile.objects.filter(is_premium = True)
-        if isPremium == 0:
+        if isPremium == "False":
             users = UserProfile.objects.filter(is_premium = False)
         
             
         if users: 
             users = UserProfileSerializer(users, many=True)
-            return JsonResponse(users.data)
+            return JsonResponse(users.data, safe=False)
         else:
-            return JsonResponse({'error':'premium takes only 1,2,0 as parameters'})
+            return JsonResponse({'error':'none found'})
    
     
 @method_decorator(csrf_protect, name='dispatch')   
@@ -164,6 +160,7 @@ class GetUserProfilePage(APIView):
         
         liked_stories = Story.objects.filter(liked_by__id = user).count()
         comments_made = Comments.objects.filter(creator = user).count()
+        stories_made = Story.objects.filter(creator_id = user).count()
         user_profile = UserProfile.objects.get(user__id = user)
         response = UserProfileSerializer(user_profile)
         
@@ -171,6 +168,7 @@ class GetUserProfilePage(APIView):
             "user_data": response.data,
             "liked_stories": liked_stories,
             "number_of_comments_made_by_user": comments_made,
+            "number_of_stories_made_by_user": stories_made,
         }
         return JsonResponse(jsonresponse)
     
@@ -196,34 +194,7 @@ class GetUserLikedPosts(APIView):
                 
         }
         return JsonResponse(response)
-    
-class CreateUserComment(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    
-    def post(self, request, format=None):
-        user= self.request.user.id
-        data = self.request.data
-        try:
-            comment_body = data['body']
-        except:
-            return JsonResponse({'response':'wrong input (missing "body" key)'})
-        
-        try:
-            story = data['story']
-        except:
-            return JsonResponse({'response':'wrong input (missing "story" key)'})
-        
-        create_comment = Comments(creator = user, comment_body=comment_body)
-        create_comment.save()
-        
-        story = Story.objects.get(pk=story)
-        story.comments.add(create_comment)
-        create_comment.save()
-        
-        return JsonResponse({'response':'comment successfully added'})
-                                
-        
-        
+      
 class GetUser_MadeComments(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
@@ -231,7 +202,6 @@ class GetUser_MadeComments(APIView):
         user = self.request.user.id
         
         comments = Comments.objects.filter(creator = user)
-
         response = {
             'comments':[comment.serialize_profile() for comment in comments]
         }
@@ -260,6 +230,7 @@ class CreateUserStory(APIView):
         try:
             story_genres_ids = data['genres']
             clean_genres = story_genres_ids.split(",")
+            clean_genres_data = [int(item) for item in clean_genres if item != '']
         except:
             return JsonResponse({'response':'story has to have atleast one genre'})
         
@@ -270,7 +241,7 @@ class CreateUserStory(APIView):
         #creating story
         user_story = Story(creator_id = user, title = story_title, story_body = story_body)
         user_story.save()
-        get_genres = Genre.objects.filter(pk__in = map(int, clean_genres))
+        get_genres = Genre.objects.filter(pk__in = clean_genres_data)
         for genre in get_genres:
             user_story.genres.add(genre.id)
             user_story.save()
@@ -285,7 +256,7 @@ class GetUser_MadeStories(APIView):
         
         user_stories = Story.objects.filter(creator_id = user)
         response = [story.serialize_profile() for story in user_stories]
-        return JsonResponse(response)
+        return JsonResponse(response, safe=False)
 
 class LikeUnlikeStory(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -295,8 +266,11 @@ class LikeUnlikeStory(APIView):
         
         story_id = request.GET.get('story', None)
         
+        
         if story_id:
             story = Story.objects.get(pk = story_id)
+            if story.creator_id == user:
+                return JsonResponse({'response':'cant like your own story'})
             if Story.objects.filter(pk = story_id, liked_by = user).exists():
                 story.liked_by.remove(user)
             else:
@@ -327,22 +301,32 @@ class CommentStoryOrReplyToComment(APIView):
         except:
             reply = None
         
+        
+
         if story_id:
             story = Story.objects.get(pk = story_id)
             if reply:
-                create_comment = Comments(creator = user, comment_body=comment_body, replied_to = reply)
+                if Comments.objects.filter(~Q(replied_to = 0), creator = user).count() == 5:
+                    return JsonResponse({'response':'comment wasnt added, only 5 replies per post available'})
+                else:
+                    create_comment = Comments(creator = user, comment_body=comment_body, replied_to = reply)
             else:
-                create_comment = Comments(creator = user, comment_body=comment_body)
+                if Story.objects.filter(pk = story_id, comments__creator = user).count() == 5:
+                    return JsonResponse({'response':'comment wasnt added, only 5 comments per post available'})
+                else:
+                    create_comment = Comments(creator = user, comment_body=comment_body)
                 
             create_comment.save()
-            if Story.objects.filter(pk = story_id, comments__creator = user).count() > 5:
-                return JsonResponse({'response':'comment wasnt added, only 5 comments per post available'})
-            else:
-                story.comments.add(create_comment)
+            story.comments.add(create_comment)
+            story.save()
+            return JsonResponse({'response':'commented succesfully'})
         else:
             return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
+                
         
-        return JsonResponse({'response':'commented succesfully'})
+       
+        
+       
     
 class LikeUnlikeComment(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -353,6 +337,8 @@ class LikeUnlikeComment(APIView):
         
         if comment:
             liked_comment = Comments.objects.get(pk = comment)
+            if liked_comment.creator == user:
+                return JsonResponse({'response':'cant like your own comment'})
             if Comments.objects.filter(pk = comment, liked_by=user).exists():
                 liked_comment.liked_by.remove(user)
             else:
