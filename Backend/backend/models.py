@@ -1,7 +1,13 @@
 from django.db import models
-from logingAPI.models import User
+from logingAPI.models import User, UserProfile
+from rest_framework import serializers
 # Create your models here.
 
+class UserProfileCreatorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ('pk', 'username', 'image')
+        
 class Genre(models.Model):
     genre = models.CharField(max_length=100)
 
@@ -78,13 +84,18 @@ class Comments(models.Model):
 
 
     def serialize(self):
+        user = UserProfile.objects.get(pk = self.creator)
+        user = UserProfileCreatorSerializer(user)
         return {
+        "comment_info":{
             "comment_id":self.id,
-            "creator_user_id":self.creator,
+            #"creator_user_id":self.creator,
             "comment_body": self.comment_body,
             "replied_to_id": self.replied_to,
             "liked_by": self.liked_by.all().count(),
             "number_of_replies": Comments.objects.filter(replied_to = self.id).count()
+            },
+        "creator_info": user.data
         }
     def serialize_profile(self):
         related_story = Story.objects.get(comments__id = self.id)

@@ -190,7 +190,7 @@ class GetUserLikedPosts(APIView):
                 "story_has_next_page": page_obj.has_next(),
                 "story_has_previous_page": page_obj.has_previous(),
             },
-            "liked_stories_data":[post.serialize_profile() for post in liked_posts]
+            "liked_stories_data":[post.serialize_profile() for post in page_obj.object_list]
                 
         }
         return JsonResponse(response)
@@ -200,10 +200,18 @@ class GetUser_MadeComments(APIView):
     
     def get(self, request, format=None):
         user = self.request.user.id
-        
+        com_page = request.GET.get('page', 1)
         comments = Comments.objects.filter(creator = user)
+        paginated = Paginator(comments, per_page=10)
+        page_obj = paginated.get_page(com_page)
         response = {
-            'comments':[comment.serialize_profile() for comment in comments]
+            "comments_page": {
+                "comments_count": paginated.num_pages,
+                "comments_current": page_obj.number,
+                "comments_has_next_page": page_obj.has_next(),
+                "comments_has_previous_page": page_obj.has_previous(),
+            },
+            'comments':[comment.serialize_profile() for comment in page_obj.object_list]
         }
         return JsonResponse(response)
     
@@ -253,10 +261,20 @@ class GetUser_MadeStories(APIView):
     
     def get(self, request, format=None):
         user = self.request.user.id
-        
+        story_page = request.GET.get('page', 1)
         user_stories = Story.objects.filter(creator_id = user)
-        response = [story.serialize_profile() for story in user_stories]
-        return JsonResponse(response, safe=False)
+        paginated = Paginator(user_stories, per_page=10)
+        page_obj = paginated.get_page(story_page)
+        response = {
+            "stories_page": {
+                "story_page_count": paginated.num_pages,
+                "story_current": page_obj.number,
+                "story_has_next_page": page_obj.has_next(),
+                "story_has_previous_page": page_obj.has_previous(),
+            },
+            "stories_data":[post.serialize_profile() for post in page_obj.object_list]
+        }
+        return JsonResponse(response)
 
 class LikeUnlikeStory(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -275,7 +293,8 @@ class LikeUnlikeStory(APIView):
                 story.liked_by.remove(user)
             else:
                 story.liked_by.add(user)
-            
+                
+            story.save()
             return JsonResponse({'response':'like func success'})
         else:
             return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
@@ -343,6 +362,8 @@ class LikeUnlikeComment(APIView):
                 liked_comment.liked_by.remove(user)
             else:
                 liked_comment.liked_by.add(user)
+            
+            liked_comment.save()
             return JsonResponse({'response':'like comment func success'})
         else:
             return JsonResponse({'response':'wrong input (missing "comment" key in URL)'})

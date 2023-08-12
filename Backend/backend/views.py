@@ -5,10 +5,10 @@ from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from rest_framework import permissions
 from logingAPI.models import *
-from UserProfile.serializer import UserProfileCreatorSerializer
 from django.http import JsonResponse
 from django.db.models import Count
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 
 def get_genre_for_Yaroslav(request):
     all_genres = Genre.objects.all()
@@ -51,7 +51,13 @@ class GetFilteredStories(APIView):
             
             if genre:
                 filter_genre = genre.split(",")
-                filter_genre = [int(clean) for clean in filter_genre if clean != ""]
+                try:
+                    filter_genre = [int(clean) for clean in filter_genre if clean != ""]
+                except ValueError:
+                    return JsonResponse({'response':'invalid genre input, it should look like ?genre=1, or ?genre=1,2, or ?genre=1 or ?genre=1,2 (INTEGER ONLY)'})
+                except:
+                    return JsonResponse({'response':'unknown error'})
+                
                 if views == "True":
                     all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).order_by('-views').distinct()
                 elif views == "False":
@@ -90,11 +96,16 @@ class GetFilteredStories(APIView):
                 elif comments == "False":
                     all_posts = Story.objects.annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
                 else:
-                    all_posts = Story.objects.all().distinct()
+                    all_posts = Story.objects.all().order_by("-date").distinct()
             
             if genre:
                 filter_genre = genre.split(",")
-                filter_genre = [int(clean) for clean in filter_genre if clean != ""]
+                try:
+                    filter_genre = [int(clean) for clean in filter_genre if clean != ""]
+                except ValueError:
+                    return JsonResponse({'response':'invalid genre input, it should look like ?genre=1, or ?genre=1,2, or ?genre=1 or ?genre=1,2 (INTEGER ONLY)'})
+                except:
+                    return JsonResponse({'response':'unknown error'})
                 if views == "True":
                     all_posts = Story.objects.filter(genres__in = filter_genre).order_by('-views').distinct()
                 elif views == "False":
@@ -152,7 +163,17 @@ class GetDistinctStoryPage(APIView):
         if story_id == 0:
             return JsonResponse({"response":'wrong input - (missing "story" key)'})
         else:
-            story = Story.objects.get(pk = story_id)
+            try:
+                story = Story.objects.get(pk = story_id)
+            except ObjectDoesNotExist:
+                response = f"story with id={story_id} doesnt exist"
+                return JsonResponse({'response': response})
+            except ValueError:
+                response = f'value error (request URL: story= {story_id})'
+                return JsonResponse({'response':response})
+            except:
+                return JsonResponse({'response':'unknown error'})
+            
             clean_data = story.serialize()
             splitted_story = [(clean_data['story_body'][i:i+2000]) for i in range(0, len(clean_data['story_body']), 2000)]
             paginated_story = Paginator(splitted_story, per_page=1)
@@ -185,10 +206,19 @@ class GetDistinctRelatedStoriesPage(APIView):
         id = request.GET.get('story', None)
         related_stories_page = request.GET.get('page', 1)
         if id is not None:
-            story = Story.objects.get(pk=id)
+            try:
+                story = Story.objects.get(pk = id)
+            except ObjectDoesNotExist:
+                response = f"story with id={id} doesnt exist"
+                return JsonResponse({'response': response})
+            except ValueError:
+                response = f'uvalue error, (request URL: story= {id})'
+                return JsonResponse({'response':response})
+            except:
+                return JsonResponse({'response':'unknown error'})
             genre = [genre.id for genre in story.genres.all()]
             related_storie = Story.objects.filter(genres__in = genre).order_by('-views').distinct()
-            paginated = Paginator(related_storie, per_page=5)
+            paginated = Paginator(related_storie, 5)
             page_obj = paginated.get_page(related_stories_page)
             response = {
                 "related_page": {
@@ -212,10 +242,28 @@ class GetStoryCommentsPage(APIView):
         story_id = request.GET.get('story', None)
         comments_page = request.GET.get('page', 1)
         if story_id:
-            story = Story.objects.get(pk=story_id)
-            paginated = Paginator(story.comments.all(), per_page=10)
+            try:
+                story = Story.objects.get(pk = story_id)
+            except ObjectDoesNotExist:
+                response = f"story with id={story_id} doesnt exist"
+                return JsonResponse({'response': response})
+            except ValueError:
+                response = f'value error, (request URL: story= {story_id})'
+                return JsonResponse({'response':response})
+            except:
+                return JsonResponse({'response':'unknown error'})
+            paginated = Paginator(story.comments.filter(replied_to = 0), per_page=20)
             page_obj = paginated.get_page(comments_page)
-            response = [comments.serialize() for comments in page_obj.object_list if comments.replied_to == 0]
+            serialized_comments = [comments.serialize() for comments in page_obj.object_list if comments.replied_to == 0]
+            response = {
+                "comments_page":{
+                    "current": page_obj.number,
+                    "has_next_page": page_obj.has_next(),
+                    "has_previous_page": page_obj.has_previous(),
+                    "number_of_pages": paginated.num_pages,
+                    "number_of_comments": paginated.count
+                },
+                "comment_data": serialized_comments}
             return JsonResponse(response, safe = False)
         else:
             return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
@@ -226,11 +274,36 @@ class GetStoryCommentsReplies(APIView):
     
     def get(self, request, format=None):
         comment = request.GET.get('reply_id', None)
+        get_replies_page = request.GET.get('get_replies_page', 1)
         if comment:
-            replies = Comments.objects.filter(replied_to = comment)
-            response = [reply.serialize() for reply in replies]
-        
-            return JsonResponse(response, safe=False)
+            try:
+                get_comment = Comments.objects.get(pk = comment)
+            except ObjectDoesNotExist:
+                response = f"comment with id={comment}, doesnt exist"
+                return JsonResponse({'response':response})
+            except ValueError:
+                response = f"value error, request URL: reply_id={comment}"
+                return JsonResponse({'response':response})
+            except:
+                return JsonResponse({'response':"unknown error"})
+            
+            try:
+                replies = Comments.objects.filter(replied_to = comment)
+                paginated = Paginator(replies, per_page=10)
+                page_obj = paginated.get_page(get_replies_page)
+                response = {
+                    "comments_page":{
+                        "current": page_obj.number,
+                        "has_next_page": page_obj.has_next(),
+                        "has_previous_page": page_obj.has_previous(),
+                        "number_of_pages": paginated.num_pages,
+                        "number_of_comments": paginated.count
+                    },
+                    "replies":[reply.serialize() for reply in page_obj.object_list]
+                }
+            except:
+                return JsonResponse({'response':"unknown error"})
+            return JsonResponse(response)
         else:
             return JsonResponse({'response':'wrong input (missing "reply_id" key in URL)'}) 
     
@@ -241,7 +314,16 @@ class SetViewForStory(APIView):
         story = request.GET.get('story', None)
         
         if story:
-            get_story = Story.objects.get(pk=story)
+            try:
+                get_story = Story.objects.get(pk=story)
+            except ValueError:
+                response = f"cant set view: value error, (request URL: story = {story})"
+                return JsonResponse({'response':response})
+            except ObjectDoesNotExist:
+                response = f"cant set view: story with id={story}, doesnt exist"
+                return JsonResponse({'response':response})
+            except:
+                return JsonResponse({'response':"unknown error"})
             get_story.views += 1
             get_story.save()
             return JsonResponse({'response':'view set'})
@@ -254,8 +336,24 @@ class GetStoryOrCommentCreator(APIView):
     def get(self, request, format=None):
         user = request.GET.get('user', None)
         if user:
-            get_user = User.objects.get(pk = user)
-            get_user_profile = UserProfile.objects.get(user = get_user)
+            try:
+                get_user = User.objects.get(pk = user)
+            except ValueError:
+                response = f"value error, (request URL: story = {user})"
+                return JsonResponse({'response':response})
+            except ObjectDoesNotExist:
+                response = f"user with id={user}, doesnt exist"
+                return JsonResponse({'response':response})
+            except:
+                return JsonResponse({'response':"unknown error"})
+            try:  
+                get_user_profile = UserProfile.objects.get(user = get_user)
+            except ObjectDoesNotExist:
+                response = f"user profile doesnt exist - bug, requires fix"
+                return JsonResponse({'response':response})
+            except ValueError:
+                response = f"value error, (requested users id= {get_user.id})"
+                return JsonResponse({'response':response})
             set_user_profile_info = UserProfileCreatorSerializer(get_user_profile)
             response = {
                 'user_data': set_user_profile_info.data

@@ -12,8 +12,4 @@ class UserProfileStorySerializer(serializers.ModelSerializer):
         model = Story
         fields = ('pk', 'title', 'date', )
 
-class UserProfileCreatorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = ('pk', 'username', 'image')
     

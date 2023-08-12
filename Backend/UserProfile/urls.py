@@ -15,4 +15,4 @@ urlpatterns = [
     path('like_comment', LikeUnlikeComment.as_view()),
     
 
-]
+]   
