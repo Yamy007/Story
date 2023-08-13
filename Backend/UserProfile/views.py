@@ -321,7 +321,7 @@ class CommentStoryOrReplyToCommentOrEditComment(APIView):
         user = self.request.user.id
         data = request.data
         try:
-            edit = data['edit']
+            edit = data['update']
         except:
             edit = None
             
