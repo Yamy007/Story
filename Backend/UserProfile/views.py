@@ -91,19 +91,15 @@ class UpdateUserProfile(APIView):
             email = data['email']
             regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
             if re.fullmatch(regex, email):
-                modify = UserProfile.objects.get(user__id = user_id)
-                modify.email = email
-                modify.save()
+                if User.objects.filter(email = email).exists():
+                    modify = UserProfile.objects.get(user__id = user_id)
+                    modify.email = email
+                    modify.save()
+                else:
+                    return JsonResponse({'error': 'email is already in use'})
             else:
                 return JsonResponse({'error': 'invalid email'})
-            
-            if User.objects.filter(email = email).exists():
-                return JsonResponse({'error': 'email is already in use'})
-            else:
-                modify = UserProfile.objects.get(user__id = user_id)
-                modify.email = email
-                modify.save()
-                
+                  
         except (MultiValueDictKeyError, KeyError):
             pass
         except:
@@ -112,7 +108,7 @@ class UpdateUserProfile(APIView):
             
         try:
             phone = data['phone']
-            clean_phone = re.sub("[-/()!?]","",phone)
+            clean_phone = re.sub("[-/()!?]","", phone)
             if clean_phone[1:].isnumeric():
                 modify = UserProfile.objects.get(user__id = user_id)
                 modify.phone = clean_phone
@@ -158,17 +154,17 @@ class GetUserProfilePage(APIView):
     def post(self, request, format=None):
         user = self.request.user.id
         
-        liked_stories = Story.objects.filter(liked_by__id = user).count()
-        comments_made = Comments.objects.filter(creator = user).count()
-        stories_made = Story.objects.filter(creator_id = user).count()
+        # liked_stories = Story.objects.filter(liked_by__id = user).count()
+        # comments_made = Comments.objects.filter(creator = user).count()
+        # stories_made = Story.objects.filter(creator_id = user).count()
         user_profile = UserProfile.objects.get(user__id = user)
         response = UserProfileSerializer(user_profile)
         
         jsonresponse = {
             "user_data": response.data,
-            "liked_stories": liked_stories,
-            "number_of_comments_made_by_user": comments_made,
-            "number_of_stories_made_by_user": stories_made,
+            # "liked_stories": liked_stories,
+            # "number_of_comments_made_by_user": comments_made,
+            # "number_of_stories_made_by_user": stories_made,
         }
         return JsonResponse(jsonresponse)
     
@@ -189,6 +185,7 @@ class GetUserLikedPosts(APIView):
                 "story_current": page_obj.number,
                 "story_has_next_page": page_obj.has_next(),
                 "story_has_previous_page": page_obj.has_previous(),
+                "number_of_liked_stories": paginated.count
             },
             "liked_stories_data":[post.serialize_profile() for post in page_obj.object_list]
                 
@@ -210,12 +207,13 @@ class GetUser_MadeComments(APIView):
                 "comments_current": page_obj.number,
                 "comments_has_next_page": page_obj.has_next(),
                 "comments_has_previous_page": page_obj.has_previous(),
+                "number_of_comments": paginated.count
             },
             'comments':[comment.serialize_profile() for comment in page_obj.object_list]
         }
         return JsonResponse(response)
     
-class CreateUserStory(APIView):
+class CreateOrUpdateUserStory(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
     def post(self, request, format=None):
@@ -224,7 +222,6 @@ class CreateUserStory(APIView):
         # pf.censor_char = '*'
         user = self.request.user.id
         data = self.request.data
-
         try:
             story_title = data['title']
         except:
@@ -242,6 +239,22 @@ class CreateUserStory(APIView):
         except:
             return JsonResponse({'response':'story has to have atleast one genre'})
         
+        try:
+            to_update = data['update']
+            story = Story.objects.get(pk = to_update)
+            if story.creator_id == user:
+                story.story_body = story_body
+                get_genres = Genre.objects.filter(pk__in = clean_genres_data)
+                for genre in get_genres:
+                    story.genres.add(genre.id)
+                    story.save()
+                story.title = story_title + " (Edit)"
+                story.save()
+                return JsonResponse({'response':'sucessfully updated'})
+            else:
+                return JsonResponse({'response':'wrong request user'})
+        except:
+            pass
         # story_title = pf.censor(story_title)
         # story_body = pf.censor(story_body)
         # story_genres_ids = story_genres_ids.split(',')
@@ -271,6 +284,7 @@ class GetUser_MadeStories(APIView):
                 "story_current": page_obj.number,
                 "story_has_next_page": page_obj.has_next(),
                 "story_has_previous_page": page_obj.has_previous(),
+                "number_of_stories":paginated.count
             },
             "stories_data":[post.serialize_profile() for post in page_obj.object_list]
         }
@@ -325,12 +339,12 @@ class CommentStoryOrReplyToComment(APIView):
         if story_id:
             story = Story.objects.get(pk = story_id)
             if reply:
-                if Comments.objects.filter(~Q(replied_to = 0), creator = user).count() == 5:
+                if len([comm for comm in story.comments.all() if comm.replied_to != 0 and comm.creator == user]) == 5:
                     return JsonResponse({'response':'comment wasnt added, only 5 replies per post available'})
                 else:
                     create_comment = Comments(creator = user, comment_body=comment_body, replied_to = reply)
             else:
-                if Story.objects.filter(pk = story_id, comments__creator = user).count() == 5:
+                if len([comm for comm in story.comments.all() if comm.replied_to == 0 and comm.creator == user]) == 5:
                     return JsonResponse({'response':'comment wasnt added, only 5 comments per post available'})
                 else:
                     create_comment = Comments(creator = user, comment_body=comment_body)
@@ -342,11 +356,7 @@ class CommentStoryOrReplyToComment(APIView):
         else:
             return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
                 
-        
-       
-        
-       
-    
+           
 class LikeUnlikeComment(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
@@ -367,3 +377,47 @@ class LikeUnlikeComment(APIView):
             return JsonResponse({'response':'like comment func success'})
         else:
             return JsonResponse({'response':'wrong input (missing "comment" key in URL)'})
+        
+        
+class GetDistinctUserNotificationMessages(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def post(self, request, format=None):
+        user = self.request.user.id
+        notification_page = request.GET.get('page', 1)
+        get_profile = UserProfile.objects.get(user=user)
+        user_stories = Story.objects.filter(creator_id = get_profile.user.id)
+        user_comments = Comments.objects.filter(creator = get_profile.user.id)
+        response = []
+
+        for story in user_stories:
+            st = {}
+            st['story_id'] = story.id
+            st['title'] = story.title
+            st['new_comments'] = len([coo for coo in story.comments.all() if coo.read_by_user == False and coo.creator != user and coo.replied_to == 0])
+            if st['new_comments'] > 0:
+                response.append(st)
+            
+        for comment in user_comments:
+            sto = Story.objects.get(comments__id = comment.id)
+            cm = {}
+            cm['comment_id'] = comment.id
+            cm['origin_story'] = sto.title
+            cm['new_replies'] = len([comm for comm in sto.comments.all() if comm.replied_to == comment.id and comm.creator != get_profile.user.id and comm.read_by_user == False])      
+            if cm['new_replies'] > 0:
+                response.append(cm)
+        
+        paginated = Paginator(response, per_page=5)
+        page_obj = paginated.get_page(notification_page)
+        
+        final = {
+            "notification_page":{
+                "notification_page_count": paginated.num_pages,
+                "notification_current": page_obj.number,
+                "notification_has_next_page": page_obj.has_next(),
+                "notification_has_previous_page": page_obj.has_previous(),
+                "number_of_notifications":paginated.count
+            },
+            "notifications": page_obj.object_list
+        }
+        return JsonResponse(final, safe=False)

@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from rest_framework import permissions
 from logingAPI.models import *
+from UserProfile.serializer import UserProfileSerializer
 from django.http import JsonResponse
 from django.db.models import Count
 from django.db.models import Q
@@ -18,6 +19,7 @@ class GetFilteredStories(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, format=None):
+        user = self.request.user
         page_number = request.GET.get("page", 1)
         genre = request.GET.get("genre", None)
         views = request.GET.get("views", None)
@@ -37,9 +39,9 @@ class GetFilteredStories(APIView):
                 elif likes == "False":
                     all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
                 elif date == "True":
-                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).order_by('-date').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).order_by('-datetime').distinct()
                 elif date == "False":
-                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).order_by('date').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).order_by('datetime').distinct()
                 elif comments == "True":
                     all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search)).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
                 elif comments == "False":
@@ -67,9 +69,9 @@ class GetFilteredStories(APIView):
                 elif likes == "False":
                     all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
                 elif date == "True":
-                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).order_by('-date').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).order_by('-datetime').distinct()
                 elif date == "False":
-                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).order_by('date').distinct()
+                    all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).order_by('datetime').distinct()
                 elif comments == "True":
                     all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
                 elif comments == "False":
@@ -88,15 +90,15 @@ class GetFilteredStories(APIView):
                 elif likes == "False":
                     all_posts = Story.objects.annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
                 elif date == "True":
-                    all_posts = Story.objects.all().order_by('-date').distinct()
+                    all_posts = Story.objects.all().order_by('-datetime').distinct()
                 elif date == "False":
-                    all_posts = Story.objects.all().order_by('date').distinct()
+                    all_posts = Story.objects.all().order_by('datetime').distinct()
                 elif comments == "True":
                     all_posts = Story.objects.annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
                 elif comments == "False":
                     all_posts = Story.objects.annotate(num_liked_by = Count('comments')).order_by('num_liked_by').distinct()
                 else:
-                    all_posts = Story.objects.all().order_by("-date").distinct()
+                    all_posts = Story.objects.all().order_by("-datetime").distinct()
             
             if genre:
                 filter_genre = genre.split(",")
@@ -115,9 +117,9 @@ class GetFilteredStories(APIView):
                 elif likes == "False":
                     all_posts = Story.objects.filter(genres__in = filter_genre).annotate(num_liked_by = Count('liked_by')).order_by('num_liked_by').distinct()
                 elif date == "True":
-                    all_posts = Story.objects.filter(genres__in = filter_genre).order_by('-date').distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).order_by('-datetime').distinct()
                 elif date == "False":
-                    all_posts = Story.objects.filter(genres__in = filter_genre).order_by('date').distinct()
+                    all_posts = Story.objects.filter(genres__in = filter_genre).order_by('datetime').distinct()
                 elif comments == "True":
                     all_posts = Story.objects.filter(genres__in = filter_genre).annotate(num_liked_by = Count('comments')).order_by('-num_liked_by').distinct()
                 elif comments == "False":
@@ -144,7 +146,7 @@ class GetFilteredStories(APIView):
             return JsonResponse(response)
         else:
             search_response = 'nothing was found :('
-            all_posts = Story.objects.all().order_by('-date').distinct()
+            all_posts = Story.objects.all().order_by('-datetime').distinct()
             paginated = Paginator(all_posts, per_page=5)
             page_obj = paginated.get_page(1)
             response = {
@@ -189,7 +191,7 @@ class GetDistinctStoryPage(APIView):
                     "story_id":story.id,
                     "user_creator_id":story.creator_id,
                     "title": story.title,
-                    "date": story.date,
+                    "date": story.datetime,
                     "likes": story.liked_by.all().count(),
                     "comments": story.comments.all().count(),
                     "genres": [genre.genre for genre in story.genres.all()],
@@ -361,6 +363,21 @@ class GetStoryOrCommentCreator(APIView):
             return JsonResponse(response)
         else:
             return JsonResponse({'response':'wrong input (missing "user" key in URL)'})   
+ 
+ 
+class MarkAsRead(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def post(self, request, format=None):
+        comment = request.GET.get('comment', None)
+        try:
+            clean_data = [int(id) for id in comment.split(',') if id != '' or id != ' ']
+        except:
+            return JsonResponse({'response':f'wrong comment id in URL -------> comment={comment}'})
+        mark = Comments.objects.filter(pk__in = clean_data)
+        mark.update(read_by_user = True)
+
+        return JsonResponse({'response':f'comment {comment} was marked as read_by_user'}) 
            
 def test_plug_func(request):
     genres = ["Life", "Horror", "Adventure", "Sad"]

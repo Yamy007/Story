@@ -27,7 +27,7 @@ class Story(models.Model):
     story_body = models.CharField(max_length=1000000)
     liked_by = models.ManyToManyField(User, default=None)
     comments = models.ManyToManyField('Comments', default=None)
-    date = models.DateField(auto_now_add=True)
+    datetime = models.DateTimeField(auto_now_add=True)
     genres = models.ManyToManyField(Genre, related_name='genres')
     views = models.IntegerField(default=0)
     archived = models.BooleanField(default=False)
@@ -42,7 +42,7 @@ class Story(models.Model):
             "title": self.title,
             "story_body": self.story_body,
             "liked_by": [user.id for user in self.liked_by.all()],
-            "date": self.date,
+            "date": self.datetime,
             "comments": [comment.id for comment in self.comments.all()],
             "genres": [genre.id for genre in self.genres.all()],
             "views": self.views,
@@ -54,7 +54,7 @@ class Story(models.Model):
             "creator_user_id":self.creator_id,
             "title": self.title,
             "story_body": self.story_body[:50],
-            "date": self.date,
+            "date": self.datetime,
             "likes": self.liked_by.all().count(),
             "comments": self.comments.all().count(),
             "genres": [genre.id for genre in self.genres.all()],
@@ -66,7 +66,7 @@ class Story(models.Model):
         return {
             "story_id":self.id,
             "title": self.title,
-            "date": self.date,
+            "date": self.datetime,
             "likes": self.liked_by.all().count(),
             "comments": self.comments.all().count(),
             "views": self.views,
@@ -78,6 +78,8 @@ class Comments(models.Model):
     comment_body = models.TextField(max_length=1000)
     replied_to = models.IntegerField(default=0) 
     liked_by = models.ManyToManyField(User, default=None)
+    read_by_user = models.BooleanField(default=False)
+    datetime = models.DateTimeField(auto_now_add=True)
     
     def __str__(self) -> str:
         return f"{self.creator}, {self.id}"

@@ -7,7 +7,8 @@ from django.utils.decorators import method_decorator
 from django.contrib import auth
 from string import punctuation
 from django.http import JsonResponse
-from rest_framework.response import Response
+from UserProfile.serializer import UserProfileSerializer
+from backend.models import Story, Comments
 # from profanity_filter import ProfanityFilter
 
 @method_decorator(csrf_protect, name='dispatch')
@@ -92,19 +93,29 @@ class LoginView(APIView):
     
     def post(self, request, format=None):
         data = self.request.data
+        username = data['username']
+        password = data['password']
+        
+        user = auth.authenticate(username=username, password=password)
         try:
-            username = data['username']
-            password = data['password']
-            
-            user = auth.authenticate(username=username, password=password)
-            
             if user is not None:
                 auth.login(request, user)
-                return JsonResponse({'response': True})
+                get_profile = UserProfile.objects.get(username=username)
+                user_stories = Story.objects.filter(creator_id = get_profile.user.id)
+                notifications_by_comments = [comment for user_story in user_stories for comment in user_story.comments.all()  if comment.replied_to == 0 and comment.read_by_user == False and comment.creator != get_profile.user.id]
+                user_comments = Comments.objects.filter(creator=get_profile.user.id)
+                notifications_by_replies = Comments.objects.filter(replied_to__in = [user_comment.id for user_comment in user_comments if user_comment.id != get_profile.user.id]).count()
+                user_data = {
+                    "SUCCESS":"LOGGED IN",
+                    "user": UserProfileSerializer(get_profile).data,
+                    "user_notifications": len(notifications_by_comments) + notifications_by_replies
+                }
+                return JsonResponse(user_data)
             else:
                 return JsonResponse({'response': False})
         except:
             return JsonResponse({'response': False})
+
 
 @method_decorator(csrf_protect, name='dispatch')       
 class LogoutView(APIView):
