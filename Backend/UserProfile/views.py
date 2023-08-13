@@ -12,6 +12,7 @@ import re
 from django.core.paginator import Paginator
 from django.utils.datastructures import MultiValueDictKeyError
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 #from profanity_filter import ProfanityFilter
 
 
@@ -313,21 +314,46 @@ class LikeUnlikeStory(APIView):
         else:
             return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
         
-class CommentStoryOrReplyToComment(APIView):
+class CommentStoryOrReplyToCommentOrEditComment(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
     def post(self, request, format=None):
         user = self.request.user.id
         data = request.data
         try:
+            edit = data['edit']
+        except:
+            edit = None
+            
+        try:
+            comment_body = data['comment']
+        except:
+            return JsonResponse({'response':'wrong input (missing "comment" key in body)'})   
+        
+        if edit:
+            try:
+                to_edit = Comments.objects.get(pk = edit)
+            except ObjectDoesNotExist:
+                response = f"comment with id={edit} doesnt exist"
+                return JsonResponse({'response': response})
+            except ValueError:
+                response = f'value error (request URL: edit= {edit})'
+                return JsonResponse({'response':response})
+            except:
+                return JsonResponse({'response':'unknown error'})
+            
+            if to_edit.creator != user:
+                return JsonResponse({'response':'wrong request user'})
+            to_edit.comment_body += "\n\n(Edit): " + comment_body
+            to_edit.save()
+            return JsonResponse({"response":"comment was successfully edited"})
+        
+        try:
             story_id = data['story']
         except:
             return JsonResponse({'response':'wrong input (missing "story" key in body)'})
         
-        try:
-            comment_body = data['comment']
-        except:
-            return JsonResponse({'response':'wrong input (missing "comment" key in body)'})
+        
         
         try:
             reply = data['reply']
@@ -335,9 +361,21 @@ class CommentStoryOrReplyToComment(APIView):
             reply = None
         
         
-
+            
+        
+        
         if story_id:
-            story = Story.objects.get(pk = story_id)
+            try:
+                story = Story.objects.get(pk = story_id)    
+            except ObjectDoesNotExist:
+                response = f"story with id={story_id} doesnt exist"
+                return JsonResponse({'response': response})
+            except ValueError:
+                response = f'value error (request URL: story= {story_id})'
+                return JsonResponse({'response':response})
+            except:
+                return JsonResponse({'response':'unknown error'})
+            
             if reply:
                 if len([comm for comm in story.comments.all() if comm.replied_to != 0 and comm.creator == user]) == 5:
                     return JsonResponse({'response':'comment wasnt added, only 5 replies per post available'})
