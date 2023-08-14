@@ -1,34 +1,24 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
-import { api } from '../api/api'
-import { Box } from '@mui/material'
 import { Container } from '../Home/Container'
+import { PostActions } from '../../reduxCore/actions/PostActions.js'
+import { useDispatch } from 'react-redux'
+import { StoryFetch } from './StoryApi/StoryFetch'
 
 export const Storys = ({ isDark }) => {
-	const [story, setStory] = useState()
-	const [data, setData] = useState(1)
 	const [page, setPage] = useState(1)
+
+	const dispatch = useDispatch()
 	useEffect(() => {
 		const FetchData = async () => {
-			try {
-				const response = await api.get(`get_all_posts?page=${page}`)
-				setData(response.page)
-				setStory(response.data.data)
-			} catch (err) {
-				console.log(err)
-			}
+			dispatch(PostActions.setPost(await StoryFetch.getStory(page)))
 		}
 		FetchData()
-	}, [page])
+	}, [dispatch, page])
+
 	return (
 		<>
-			<Container
-				story={story}
-				data={data}
-				setPage={setPage}
-				page={page}
-				isDark={isDark}
-			/>
+			<Container setPage={setPage} isDark={isDark} />
 		</>
 	)
 }

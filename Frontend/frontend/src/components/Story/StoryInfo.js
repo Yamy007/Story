@@ -2,27 +2,24 @@ import React, { useState, useEffect } from 'react'
 import { Box, Typography, Pagination } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import styles from './Style/Style.module.css'
-import { api } from '../api/api'
+import { StoryActions } from '../../reduxCore/actions/StoryActions.js'
+import { useDispatch, useSelector } from 'react-redux'
+import { StoryFetch } from './StoryApi/StoryFetch'
 
 export const StoryInfo = ({ isDark }) => {
 	const { id } = useParams()
-	const [story, setStory] = useState()
+	const dispatch = useDispatch()
+	const story = useSelector(state => state.story.data)
+	const allPage = useSelector(state => state.story.page.story_page_count)
+
 	const [page, setPage] = useState(1)
-	const [pg, setPg] = useState(null)
+
 	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const response = await api.get(
-					`get_all_posts?story=${id}&story_page=${page}`
-				)
-				setStory(response.data.story_data)
-				setPg(response.data.story_page)
-			} catch (err) {
-				console.log(err)
-			}
+		const FetchData = async () => {
+			dispatch(StoryActions.setStory(await StoryFetch.getStoryInfo(id, page)))
 		}
-		fetchData()
-	}, [page])
+		FetchData()
+	}, [dispatch, id, page])
 
 	return (
 		<Box bgcolor={isDark ? '#000000e8' : '#EBEBEB'} className={styles.wrapper}>
@@ -32,14 +29,14 @@ export const StoryInfo = ({ isDark }) => {
 					component='p'
 					style={isDark ? { color: '#B8B8B8' } : { color: '#363434' }}
 				>
-					{story?.body[0]}
+					{story.body}
 				</Typography>
 			</Box>
 			<Pagination
 				variant='outlined'
 				color='secondary'
 				sx={{ marginBottom: '15px' }}
-				count={pg?.story_page_count}
+				count={allPage}
 				page={page}
 				onChange={(e, newPage) => {
 					setPage(newPage)

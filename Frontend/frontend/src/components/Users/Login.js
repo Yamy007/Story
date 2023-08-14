@@ -5,16 +5,6 @@ import { UserAuth } from '../api/user'
 import { useNavigate } from 'react-router-dom'
 import styles from './style.module.css'
 
-import { makeStyles } from '@mui/material'
-
-const useStyles = makeStyles({
-	customTextField: {
-		'& .MuiOutlinedInput-root': {
-			borderColor: 'red', // Ось тут ви задаєте бажаний колір межі
-		},
-	},
-})
-
 function checkStartingLetters(words, letters) {
 	if (letters === '') {
 		return true
@@ -29,8 +19,6 @@ function checkStartingLetters(words, letters) {
 }
 
 export const Login = ({ onSave }) => {
-	const classes = useStyles()
-
 	const { register, handleSubmit } = useForm()
 	const [data, setData] = useState([])
 	const [check, setCheck] = useState(true)
@@ -58,7 +46,6 @@ export const Login = ({ onSave }) => {
 				style={{ paddingTop: '10vh' }}
 			>
 				<TextField
-					className={classes.customTextField}
 					label='username'
 					type='text'
 					sx={{ width: '30vw' }}

@@ -15,8 +15,10 @@ import { Button, Box } from '@mui/material'
 import { Link } from 'react-router-dom'
 import clipboardCopy from 'clipboard-copy'
 import { Color } from '../ColorGenre/Color'
-export const Story = ({ story, isDark }) => {
+import { useSelector } from 'react-redux'
+export const Story = ({ isDark }) => {
 	const data = Color(isDark)
+
 	const handleCopyToClipboard = id => {
 		const textToCopy = window.location.href + '/' + id
 		clipboardCopy(textToCopy)
@@ -28,6 +30,7 @@ export const Story = ({ story, isDark }) => {
 			})
 	}
 
+	const story = useSelector(state => state.posts.data)
 	return (
 		<>
 			{story?.map((elem, index) => (
