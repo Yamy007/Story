@@ -70,5 +70,24 @@ export const UserAuth = () => {
 				.catch(err => console.log(err))
 			return response
 		},
+		Profile: async () => {
+			try {
+				const response = await axios.post(
+					'http://localhost:8000/users/profile',
+					{},
+					{
+						headers: {
+							'Content-Type': 'application/json',
+							'X-CSRFToken': Cookies.get('csrftoken'),
+						},
+						withCredentials: true,
+					}
+				)
+
+				return response
+			} catch (err) {
+				return err
+			}
+		},
 	}
 }

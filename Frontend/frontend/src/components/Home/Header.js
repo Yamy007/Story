@@ -17,20 +17,19 @@ import { useState, useEffect } from 'react'
 import { Logout } from '../Users/Logout'
 import { useNavigate } from 'react-router-dom'
 import { UserAuth } from '../api/user'
+import { useSelector } from 'react-redux'
 
 export const Header = ({ isDark, setIsDark, save, onSave }) => {
-	const [isAuth, setIsAuth] = useState(false)
+	//const [isAuth, setIsAuth] = useState(false)
 	let redirect = useNavigate()
 
-	useEffect(() => {
-		const check = async () => {
-			const response = await UserAuth().check()
-			console.log(response)
-			setIsAuth(response?.data.response)
-		}
-		check()
-	}, [isAuth, save])
-	console.log(save)
+	const isAuth = useSelector(state => state.users.isAuthenticated)
+	const avatar =
+		useSelector(state => state.users.user.image) ||
+		'https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D&w=1000&q=80'
+	const username = useSelector(state => state.users.user.username)
+	console.log(username)
+
 	const pages = ['Home', 'Story', 'Blog']
 	const settings = isAuth ? ['Settings', 'Logout'] : ['Register', 'Login']
 
@@ -51,6 +50,7 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 	const handleCloseUserMenu = () => {
 		setAnchorElUser(null)
 	}
+
 	const Action = type => {
 		if (type === 'Logout') {
 			onSave(prev => !prev)
@@ -64,6 +64,7 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 			return redirect('/user/login')
 		}
 	}
+
 	return (
 		<AppBar
 			position='fixed'
@@ -178,7 +179,11 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 						<Box sx={{ flexGrow: 0 }}>
 							<Tooltip title='Open settings'>
 								<IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-									<Avatar alt='Remy Sharp' src='/static/images/avatar/2.jpg' />
+									<Avatar
+										sx={{ width: '55px', height: '55px' }}
+										alt={username}
+										src={avatar ? avatar : 'http://localhost:3000/avatar2.png'}
+									/>
 								</IconButton>
 							</Tooltip>
 							<Menu

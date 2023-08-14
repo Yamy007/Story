@@ -9,7 +9,10 @@ import { Storys } from './components/Story/Storys'
 import { StoryInfo } from './components/Story/StoryInfo'
 import { Login } from './components/Users/Login'
 import { Register } from './components/Users/Register'
+import { UserApi } from './components/Users/UserApi.js/UserApi'
+import { Settings } from './components/Home/Settings'
 function App() {
+	console.log(UserApi())
 	const [isDark, setIsDark] = useState(true)
 	const [save, onSave] = useState(false)
 	return (
@@ -42,6 +45,10 @@ function App() {
 				<Route
 					path='/user/register'
 					element={<Register isDark={isDark} onSave={onSave} />}
+				></Route>
+				<Route
+					path='/settings'
+					element={<Settings isDark={isDark} onSave={onSave} />}
 				></Route>
 			</Routes>
 		</ThemeProvider>

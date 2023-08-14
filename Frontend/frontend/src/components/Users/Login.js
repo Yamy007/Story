@@ -30,10 +30,12 @@ export const Login = ({ onSave }) => {
 	}, [onSave])
 
 	let redirect = useNavigate()
-	const onSubmit = async data => {
-		const response = await UserAuth().login(data)
+	const onSubmit = async () => {
+		const check = await UserAuth().checkCookie()
+		console.log(check)
+		const response = await UserAuth().login()
 		onSave(prev => !prev)
-		if (response.data.response) {
+		if (response?.data.response) {
 			return redirect('/')
 		}
 	}
