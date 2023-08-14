@@ -348,6 +348,7 @@ class GetStoryOrCommentCreator(APIView):
                 return JsonResponse({'response':response})
             except:
                 return JsonResponse({'response':"unknown error"})
+            
             try:  
                 get_user_profile = UserProfile.objects.get(user = get_user)
             except ObjectDoesNotExist:
@@ -374,10 +375,20 @@ class MarkAsRead(APIView):
             clean_data = [int(id) for id in comment.split(',') if id != '' or id != ' ']
         except:
             return JsonResponse({'response':f'wrong comment id in URL -------> comment={comment}'})
-        mark = Comments.objects.filter(pk__in = clean_data)
-        mark.update(read_by_user = True)
+        
+        for cm in clean_data:
+            try:
+                mark = Comments.objects.get(pk = cm)
+            except ObjectDoesNotExist:
+                response = f"comment with id={cm} doesnt exist"
+                return JsonResponse({'response':response})
+            except ValueError:
+                response = f"value error, (requested comment id= {comment})"
+            mark.read_by_user = True
+            mark.save()
+        
+        return JsonResponse({'response':f'comment id={clean_data} marked as read'})
 
-        return JsonResponse({'response':f'comment {comment} was marked as read_by_user'}) 
            
 def test_plug_func(request):
     genres = ["Life", "Horror", "Adventure", "Sad"]
