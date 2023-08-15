@@ -1,94 +1,56 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Avatar, Button, Container, Grid, TextField } from '@mui/material'
+import Cookies from 'js-cookie'
+import axios from 'axios'
+import { UserAuth } from '../api/user'
 
 export const Settings = () => {
-	const [formData, setFormData] = useState({
-		photo: null, // Змінюємо на null, оскільки тепер це буде об'єкт файлу
-		name: '',
-		surname: '',
-		email: '',
-		bio: '',
-		phone: '',
-		address: '',
-	})
+	const [avatar, setAvatar] = useState(null)
 
-	const handlePhotoChange = event => {
-		const selectedPhoto = event.target.files[0]
-		setFormData(prevData => ({
-			...prevData,
-			photo: selectedPhoto,
-		}))
-	}
-	const handleInputChange = event => {
-		const { name, value } = event.target
-		setFormData(prevData => ({
-			...prevData,
-			[name]: value,
-		}))
-	}
+	useEffect(() => {
+		const respose = UserAuth().check()
+		console.log(respose)
+	}, [])
 
-	const handleSubmit = event => {
-		event.preventDefault()
-		console.log(formData)
+	const handleSubmit = e => {
+		UserAuth().profileUpdate()
+		e.preventDefault()
 	}
-
 	return (
 		<Container maxWidth='md' sx={{ paddingTop: '10vh' }}>
-			<Grid container spacing={3} alignItems='center'>
-				<Grid item xs={12} align='center'>
-					<Avatar alt='User Photo' src='' />
-					<input type='file' accept='image/*' onChange={handlePhotoChange} />
-				</Grid>
-				<Grid item xs={12}>
-					<form onSubmit={handleSubmit}>
+			<form onSubmit={handleSubmit}>
+				<Grid container spacing={3} alignItems='center'>
+					<Grid item xs={12} align='center'>
+						<Avatar alt='User Photo' src='' />
+						<input type='file' onChange={e => setAvatar(e.target.value)} />
+					</Grid>
+					<Grid item xs={12}>
 						<TextField
 							fullWidth
 							label='First Name'
 							name='name'
-							value={formData.name}
-							onChange={handleInputChange}
 							margin='normal'
 						/>
 						<TextField
 							fullWidth
 							label='Last Name'
 							name='surname'
-							value={formData.surname}
-							onChange={handleInputChange}
 							margin='normal'
 						/>
-						<TextField
-							fullWidth
-							label='Email'
-							name='email'
-							value={formData.email}
-							onChange={handleInputChange}
-							margin='normal'
-						/>
+						<TextField fullWidth label='Email' name='email' margin='normal' />
 						<TextField
 							fullWidth
 							label='Bio'
 							name='bio'
-							value={formData.bio}
-							onChange={handleInputChange}
 							multiline
 							rows={4}
 							margin='normal'
 						/>
-						<TextField
-							fullWidth
-							label='Phone'
-							name='phone'
-							value={formData.phone}
-							onChange={handleInputChange}
-							margin='normal'
-						/>
+						<TextField fullWidth label='Phone' name='phone' margin='normal' />
 						<TextField
 							fullWidth
 							label='Address'
 							name='address'
-							value={formData.address}
-							onChange={handleInputChange}
 							multiline
 							rows={2}
 							margin='normal'
@@ -96,9 +58,9 @@ export const Settings = () => {
 						<Button type='submit' variant='contained' color='primary'>
 							Save Changes
 						</Button>
-					</form>
+					</Grid>
 				</Grid>
-			</Grid>
+			</form>
 		</Container>
 	)
 }

@@ -9,7 +9,7 @@ export const UserApi = () => {
 		const FetchData = async () => {
 			const check = await UserAuth().check()
 
-			if (check.data.response) {
+			if (check?.data.response) {
 				const response = await UserAuth().Profile()
 				if (response?.response?.status) {
 					dispatch(UserActions.setError(response))

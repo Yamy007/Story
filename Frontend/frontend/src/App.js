@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { Home } from './components/Home/Home'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
 import { darkTheme } from './Theme/darkTheme'
 import { lightTheme } from './Theme/lightTheme'
@@ -11,10 +11,12 @@ import { Login } from './components/Users/Login'
 import { Register } from './components/Users/Register'
 import { UserApi } from './components/Users/UserApi.js/UserApi'
 import { Settings } from './components/Home/Settings'
+import { UserAuth } from './components/api/user'
 function App() {
 	console.log(UserApi())
 	const [isDark, setIsDark] = useState(true)
 	const [save, onSave] = useState(false)
+
 	return (
 		<ThemeProvider theme={isDark ? darkTheme : lightTheme}>
 			<Header
