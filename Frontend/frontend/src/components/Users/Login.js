@@ -5,7 +5,7 @@ import { UserAuth } from '../api/user'
 import { useNavigate } from 'react-router-dom'
 import styles from './style.module.css'
 
-import { makeStyles } from '@mui/material'
+import { makeStyles } from '@mui/styles'
 
 const useStyles = makeStyles({
 	customTextField: {
@@ -63,6 +63,7 @@ export const Login = ({ onSave }) => {
 					type='text'
 					sx={{ width: '30vw' }}
 					onChange={e => setCheck(checkStartingLetters(data, e.target.value))}
+					{...register('username')}
 					error={!check}
 				/>
 				<TextField

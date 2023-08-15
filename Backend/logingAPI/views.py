@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
-from rest_framework import permissions, status, Response
+from rest_framework import permissions, status
+from rest_framework.response import Response
 from .models import *
 from .serializer import *
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
@@ -73,7 +74,7 @@ class SignUpView(APIView):
             else:
                 return JsonResponse({'response': 'passwords do not match'})
         except:
-            return JsonResponse({'response': False})     
+            return JsonResponse({'response': 'error during validation'})     
         
         try: 
             user_profile = UserProfile(user=upd_user_status, email=email, username = username)
@@ -81,11 +82,11 @@ class SignUpView(APIView):
             if superuser_secret_word == "isjxynasygaszgnxiasnuiqweruqiwe120942190142osidjadskamf":
                 user_profile.is_premium = True
                 user_profile.save()
-            return JsonResponse({'response':True})  
+            return JsonResponse({'response':'sucess'})  
         except:
             delete_user = User.objects.get(pk=upd_user_status.id)
             delete_user.delete()
-            return JsonResponse({'response': False})
+            return JsonResponse({'response': 'error during profile creation'})
            
         
  
@@ -115,9 +116,9 @@ class LoginView(APIView):
                 }
                 return JsonResponse(user_data)
             else:
-                return JsonResponse({'response': False})
+                return JsonResponse({'response': 'user probably doesnt exist or wrong credentials'})
         except:
-            return JsonResponse({'response': False})
+            return JsonResponse({'response': 'error during logination'})
 
 
      
