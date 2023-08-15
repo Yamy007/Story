@@ -32,14 +32,17 @@ export const Login = ({ onSave }) => {
 	let redirect = useNavigate()
 	const onSubmit = async () => {
 		const check = await UserAuth().checkCookie()
-		console.log(check)
 		const response = await UserAuth().login()
 		onSave(prev => !prev)
 		if (response?.data.response) {
 			return redirect('/')
 		}
 	}
-
+	const HandleSubmit = async e => {
+		const response = await UserAuth().profileUpdate()
+		console.log(response)
+		e.preventDefault()
+	}
 	return (
 		<Box style={{ background: '#BCB8B8' }} className={styles.container}>
 			<form
@@ -67,6 +70,15 @@ export const Login = ({ onSave }) => {
 					sx={{ width: '28vh' }}
 				>
 					Login
+				</Button>
+				<Button
+					onClick={HandleSubmit}
+					type='submit'
+					variant='contained'
+					size='large'
+					sx={{ width: '28vh' }}
+				>
+					Logissfn
 				</Button>
 			</form>
 		</Box>

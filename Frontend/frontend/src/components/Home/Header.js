@@ -12,11 +12,11 @@ import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import MenuItem from '@mui/material/MenuItem'
 import { FormControlLabel, Switch } from '@mui/material'
-import { Link, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+
 import { Logout } from '../Users/Logout'
 import { useNavigate } from 'react-router-dom'
-import { UserAuth } from '../api/user'
+
 import { useSelector } from 'react-redux'
 
 export const Header = ({ isDark, setIsDark, save, onSave }) => {

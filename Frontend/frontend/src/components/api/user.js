@@ -89,5 +89,19 @@ export const UserAuth = () => {
 				return err
 			}
 		},
+		profileUpdate: async () => {
+			const response = await axios.post(
+				'http://127.0.0.1:8000/users/update_user_profile',
+				{},
+				{
+					headers: {
+						'Content-Type': 'text/plain',
+						'X-CSRFToken': Cookies.get('csrftoken'),
+					},
+					withCredentials: true,
+				}
+			)
+			return response
+		},
 	}
 }
