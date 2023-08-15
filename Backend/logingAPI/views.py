@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework import permissions
+from rest_framework import permissions, status, Response
 from .models import *
 from .serializer import *
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
@@ -11,8 +11,9 @@ from UserProfile.serializer import UserProfileSerializer
 from backend.models import Story, Comments
 # from profanity_filter import ProfanityFilter
 
-@method_decorator(csrf_protect, name='dispatch')
+
 class CheckAuthenticationStatus(APIView):
+    @method_decorator(csrf_protect, name='dispatch')
     def get(self, request, format=None):
         try:
             if request.user.is_authenticated:
@@ -23,10 +24,11 @@ class CheckAuthenticationStatus(APIView):
             return JsonResponse({'response':'something went wrong during authentication check'})
         
         
-@method_decorator(csrf_protect, name='dispatch')
+
 class SignUpView(APIView):
     permission_classes = (permissions.AllowAny,)
     
+    @method_decorator(csrf_protect, name='dispatch')
     def post(self, request, format=None):
         # pf = ProfanityFilter()
         # pf.censor_whole_words = False
@@ -87,10 +89,11 @@ class SignUpView(APIView):
            
         
  
-@method_decorator(csrf_protect, name='dispatch')
+
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
     
+    @method_decorator(csrf_protect, name='dispatch')
     def post(self, request, format=None):
         data = self.request.data
         username = data['username']
@@ -117,10 +120,11 @@ class LoginView(APIView):
             return JsonResponse({'response': False})
 
 
-@method_decorator(csrf_protect, name='dispatch')       
+     
 class LogoutView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
-
+    
+    @method_decorator(csrf_protect, name='dispatch')  
     def post(self, request, format=None):
         try:
             auth.logout(request)
@@ -129,12 +133,11 @@ class LogoutView(APIView):
             return JsonResponse({'response': False})   
         
          
-@method_decorator(ensure_csrf_cookie, name='dispatch')       
-class GetCSRF(APIView):
-    permission_classes = (permissions.AllowAny,)
-    
-    def get(self, request, format=None):
-        return JsonResponse({'response': True})
+class CsrfTokenView(APIView):
+
+    @method_decorator(ensure_csrf_cookie)
+    def get(self, request):
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 class GetUsersView(APIView):
@@ -144,10 +147,11 @@ class GetUsersView(APIView):
         users = User.objects.all()
         return JsonResponse([user.username for user in users], safe=False)
     
-@method_decorator(csrf_protect, name='dispatch')
+
 class GetUsersViewALL(APIView):
     #permission_classes = (permissions.IsAuthenticated,)
     
+    @method_decorator(csrf_protect, name='dispatch')
     def get(self, request, format=None):
         users = User.objects.all()
         users = UserSerializer(users, many=True)

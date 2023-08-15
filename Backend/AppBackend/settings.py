@@ -138,9 +138,14 @@ REST_FRAMEWORD = {
     
 }
 
+CSRF_COOKIE_PATH = '/'
+CSRF_COOKIE_SAMESITE = 'Strict'  
+CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000','http://localhost:8000']
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = ['http://localhost:3000','http://localhost:8000']
 MEDIA_URL = "/media/"
 MEDIA_ROOT= os.path.join(BASE_DIR,"media/")
+
+
