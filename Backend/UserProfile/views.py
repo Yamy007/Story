@@ -1,11 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework import permissions
-from rest_framework.response import Response
 from logingAPI.models import *
 from backend.models import *
 from .serializer import *
-from django.views.decorators.csrf import csrf_protect
-from django.utils.decorators import method_decorator
 from django.http import JsonResponse
 from string import punctuation
 import re
@@ -14,7 +11,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 #from profanity_filter import ProfanityFilter
-
+from rest_framework.authentication import TokenAuthentication
 
 class GetUserProfilesView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -37,11 +34,13 @@ class GetUserProfilesView(APIView):
             return JsonResponse({'error':'none found'})
    
     
-@method_decorator(csrf_protect, name='dispatch')   
+  
 class UpdateUserProfile(APIView):
+    authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     
+    #@method_decorator(csrf_protect) 
     def post(self, request, format=None):
         # pf = ProfanityFilter()
         # pf.censor_whole_words = False
@@ -148,10 +147,11 @@ class UpdateUserProfile(APIView):
             
         return JsonResponse({'success': 'user profile successfully updated'})     
             
-@method_decorator(csrf_protect, name='dispatch')   
+ 
 class GetUserProfilePage(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
+    #@method_decorator(csrf_protect, name='dispatch')  
     def post(self, request, format=None):
         user = self.request.user.id
         

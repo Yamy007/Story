@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
-from rest_framework import permissions
+from rest_framework import permissions, status
+from rest_framework.response import Response
 from .models import *
 from .serializer import *
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
@@ -9,11 +10,16 @@ from string import punctuation
 from django.http import JsonResponse
 from UserProfile.serializer import UserProfileSerializer
 from backend.models import Story, Comments
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.authtoken.models import Token
+
 # from profanity_filter import ProfanityFilter
 
-@method_decorator(csrf_protect, name='dispatch')
+
 class CheckAuthenticationStatus(APIView):
-    def get(self, request, format=None):
+    authentication_classes= [ SessionAuthentication ]
+    
+    def post(self, request, format=None):
         try:
             if request.user.is_authenticated:
                 return JsonResponse({'response': True})
@@ -23,10 +29,11 @@ class CheckAuthenticationStatus(APIView):
             return JsonResponse({'response':'something went wrong during authentication check'})
         
         
-@method_decorator(csrf_protect, name='dispatch')
+
 class SignUpView(APIView):
     permission_classes = (permissions.AllowAny,)
-    
+            
+    @method_decorator(csrf_protect, name='dispatch')
     def post(self, request, format=None):
         # pf = ProfanityFilter()
         # pf.censor_whole_words = False
@@ -61,6 +68,7 @@ class SignUpView(APIView):
                 
                 user = User.objects.create_user(username=username, password=password, email=email)
                 user.save()
+                token = Token.objects.create(user=user)
                 upd_user_status = User.objects.get(pk=user.id)
                 
                 if superuser_secret_word == "isjxynasygaszgnxiasnuiqweruqiwe120942190142osidjadskamf":
@@ -87,40 +95,43 @@ class SignUpView(APIView):
            
         
  
-@method_decorator(csrf_protect, name='dispatch')
+
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
     
+    @method_decorator(csrf_protect, name='dispatch')
     def post(self, request, format=None):
         data = self.request.data
         username = data['username']
         password = data['password']
         
         user = auth.authenticate(username=username, password=password)
-        try:
-            if user is not None:
-                auth.login(request, user)
-                get_profile = UserProfile.objects.get(username=username)
-                user_stories = Story.objects.filter(creator_id = get_profile.user.id)
-                notifications_by_comments = [comment for user_story in user_stories for comment in user_story.comments.all()  if comment.replied_to == 0 and comment.read_by_user == False and comment.creator != get_profile.user.id]
-                user_comments = Comments.objects.filter(creator=get_profile.user.id)
-                notifications_by_replies = Comments.objects.filter(replied_to__in = [user_comment.id for user_comment in user_comments if user_comment.id != get_profile.user.id]).count()
-                user_data = {
-                    "SUCCESS":"LOGGED IN",
-                    "user": UserProfileSerializer(get_profile).data,
-                    "user_notifications": len(notifications_by_comments) + notifications_by_replies
-                }
-                return JsonResponse(user_data)
-            else:
-                return JsonResponse({'response': False})
-        except:
+        
+        if user is not None:
+            auth.login(request, user)
+            get_profile = UserProfile.objects.get(username=username)
+            user_stories = Story.objects.filter(creator_id = get_profile.user.id)
+            notifications_by_comments = [comment for user_story in user_stories for comment in user_story.comments.all()  if comment.replied_to == 0 and comment.read_by_user == False and comment.creator != get_profile.user.id]
+            user_comments = Comments.objects.filter(creator=get_profile.user.id)
+            notifications_by_replies = Comments.objects.filter(replied_to__in = [user_comment.id for user_comment in user_comments if user_comment.id != get_profile.user.id]).count()
+            token = Token.objects.get(user=user)
+            user_data = {
+                "SUCCESS":"LOGGED IN",
+                "user": UserProfileSerializer(get_profile).data,
+                "user_notifications": len(notifications_by_comments) + notifications_by_replies,
+                "token": token.key,
+            }
+            return JsonResponse(user_data)
+        else:
             return JsonResponse({'response': False})
+        
 
 
-@method_decorator(csrf_protect, name='dispatch')       
+     
 class LogoutView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
-
+    
+    @method_decorator(csrf_protect, name='dispatch')  
     def post(self, request, format=None):
         try:
             auth.logout(request)
@@ -129,12 +140,11 @@ class LogoutView(APIView):
             return JsonResponse({'response': False})   
         
          
-@method_decorator(ensure_csrf_cookie, name='dispatch')       
-class GetCSRF(APIView):
-    permission_classes = (permissions.AllowAny,)
-    
-    def get(self, request, format=None):
-        return JsonResponse({'response': True})
+class CsrfTokenView(APIView):
+
+    @method_decorator(ensure_csrf_cookie)
+    def get(self, request):
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 class GetUsersView(APIView):
@@ -144,10 +154,11 @@ class GetUsersView(APIView):
         users = User.objects.all()
         return JsonResponse([user.username for user in users], safe=False)
     
-@method_decorator(csrf_protect, name='dispatch')
+
 class GetUsersViewALL(APIView):
     #permission_classes = (permissions.IsAuthenticated,)
     
+    @method_decorator(csrf_protect, name='dispatch')
     def get(self, request, format=None):
         users = User.objects.all()
         users = UserSerializer(users, many=True)
