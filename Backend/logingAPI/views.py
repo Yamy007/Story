@@ -129,6 +129,7 @@ class LoginView(APIView):
 
      
 class LogoutView(APIView):
+    authentication_classes= [ SessionAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     @method_decorator(csrf_protect, name='dispatch')  

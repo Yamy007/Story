@@ -149,6 +149,7 @@ class UpdateUserProfile(APIView):
             
  
 class GetUserProfilePage(APIView):
+    authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     #@method_decorator(csrf_protect, name='dispatch')  
@@ -171,6 +172,7 @@ class GetUserProfilePage(APIView):
     
 
 class GetUserLikedPosts(APIView):
+    authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     def get(self, request, format=None):
@@ -194,6 +196,7 @@ class GetUserLikedPosts(APIView):
         return JsonResponse(response)
       
 class GetUser_MadeComments(APIView):
+    authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     def get(self, request, format=None):
@@ -215,6 +218,7 @@ class GetUser_MadeComments(APIView):
         return JsonResponse(response)
     
 class CreateOrUpdateUserStory(APIView):
+    authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     def post(self, request, format=None):
@@ -271,6 +275,7 @@ class CreateOrUpdateUserStory(APIView):
         return JsonResponse({'response':'story successfully created'})
         
 class GetUser_MadeStories(APIView):
+    authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     def get(self, request, format=None):
@@ -292,6 +297,7 @@ class GetUser_MadeStories(APIView):
         return JsonResponse(response)
 
 class LikeUnlikeStory(APIView):
+    authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     def post(self, request, format=None):
@@ -315,6 +321,7 @@ class LikeUnlikeStory(APIView):
             return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
         
 class CommentStoryOrReplyToCommentOrEditComment(APIView):
+    authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     def post(self, request, format=None):
@@ -396,6 +403,7 @@ class CommentStoryOrReplyToCommentOrEditComment(APIView):
                 
            
 class LikeUnlikeComment(APIView):
+    authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     def post(self, request, format=None):
@@ -418,6 +426,7 @@ class LikeUnlikeComment(APIView):
         
         
 class GetDistinctUserNotificationMessages(APIView):
+    authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     def post(self, request, format=None):
