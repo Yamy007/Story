@@ -35,7 +35,11 @@ class GetUserProfilesView(APIView):
             return JsonResponse({'error':'none found'})
    
     
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> c6ea248 (innit)
 class UpdateUserProfile(APIView):
     authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)

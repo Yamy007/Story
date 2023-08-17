@@ -10,7 +10,6 @@ import { StoryInfo } from './components/Story/StoryInfo'
 import { Login } from './components/Users/Login'
 import { Register } from './components/Users/Register'
 import { Settings } from './components/Home/Settings'
-
 function App() {
 	// console.log(UserApi())
 	const [isDark, setIsDark] = useState(true)
@@ -40,7 +39,7 @@ function App() {
 
 				<Route
 					path='/user/login'
-					element={<Login isDark={isDark} onSave={onSave}/>}
+					element={<Login isDark={isDark} onSave={onSave} />}
 				></Route>
 
 				<Route
@@ -48,8 +47,8 @@ function App() {
 					element={<Register isDark={isDark} onSave={onSave} />}
 				></Route>
 				<Route
-					path='/settings'
-					element={<Settings isDark={isDark} onSave={onSave}/>}
+					path='/user/settings'
+					element={<Settings isDark={isDark} onSave={onSave} />}
 				></Route>
 			</Routes>
 		</ThemeProvider>

@@ -61,6 +61,9 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 			console.log('login')
 			return redirect('/user/login')
 		}
+		if (type === 'Settings') {
+			return redirect('/user/settings')
+		}
 	}
 
 	return (

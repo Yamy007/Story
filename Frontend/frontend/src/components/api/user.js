@@ -61,7 +61,7 @@ export const User = () => {
 			return response
 		},
 
-		Registration: async (
+		registration: async (
 			data = {
 				username: 'name1',
 				email: 'email@test.com',
