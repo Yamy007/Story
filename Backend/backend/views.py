@@ -152,6 +152,13 @@ class GetFilteredStories(APIView):
             page_obj = paginated.get_page(1)
             response = {
                 "response":search_response,
+                "page": {
+                        "current": 1,
+                        "has_next": False,
+                        "has_previous": False,
+                        "number_of_pages": 1,
+                        "number_of_stories": 0
+                    },
                 "recommendations": [story.serialize_general() for story in page_obj.object_list]
             }
             return JsonResponse(response)
@@ -225,11 +232,11 @@ class GetDistinctRelatedStoriesPage(APIView):
             page_obj = paginated.get_page(related_stories_page)
             response = {
                 "related_page": {
-                "current": page_obj.number,
-                "has_next_page": page_obj.has_next(),
-                "has_previous_page": page_obj.has_previous(),
-                "number_of_pages": paginated.num_pages,
-                "number_of_stories": paginated.count       
+                    "current": page_obj.number,
+                    "has_next_page": page_obj.has_next(),
+                    "has_previous_page": page_obj.has_previous(),
+                    "number_of_pages": paginated.num_pages,
+                    "number_of_stories": paginated.count       
                 },
                 "related": [related_stories.serialize_general() for related_stories in page_obj.object_list if related_stories != story],
             }
@@ -340,23 +347,13 @@ class GetStoryOrCommentCreator(APIView):
     def get(self, request, format=None):
         user = request.GET.get('user', None)
         if user:
-            try:
-                get_user = User.objects.get(pk = user)
-            except ValueError:
-                response = f"value error, (request URL: story = {user})"
-                return JsonResponse({'response':response})
-            except ObjectDoesNotExist:
-                response = f"user with id={user}, doesnt exist"
-                return JsonResponse({'response':response})
-            except:
-                return JsonResponse({'response':"unknown error"})
             try:  
-                get_user_profile = UserProfile.objects.get(user = get_user)
+                get_user_profile = UserProfile.objects.get(user__id = user)
             except ObjectDoesNotExist:
                 response = f"user profile doesnt exist - bug, requires fix"
                 return JsonResponse({'response':response})
             except ValueError:
-                response = f"value error, (requested users id= {get_user.id})"
+                response = f"value error, (requested users id= {user})"
                 return JsonResponse({'response':response})
             set_user_profile_info = UserProfileCreatorSerializer(get_user_profile)
             response = {

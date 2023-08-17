@@ -55,6 +55,7 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 		if (type === 'Logout') {
 			onSave(prev => !prev)
 			Logout()
+			redirect('/')
 		}
 		if (type === 'Register') {
 			return redirect('/user/register')

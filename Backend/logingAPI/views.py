@@ -12,6 +12,7 @@ from UserProfile.serializer import UserProfileSerializer
 from backend.models import Story, Comments
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
+import re
 
 # from profanity_filter import ProfanityFilter
 
@@ -63,6 +64,8 @@ class SignUpView(APIView):
                     return JsonResponse({'response': 'password cannot contain special symbols'})
                 if password.isnumeric():
                     return JsonResponse({'response': 'password cannot be entirely numeric'})
+                if any(symbol in username for symbol in set(punctuation)):
+                    return JsonResponse({'response': 'username cannot contain special symbols'})
                 # if pf.is_profane(username):
                 #     return JsonResponse({'response':'username cannot contain bad words'})
                 
@@ -102,14 +105,24 @@ class LoginView(APIView):
     @method_decorator(csrf_protect, name='dispatch')
     def post(self, request, format=None):
         data = self.request.data
-        username = data['username']
+        login_credential = data['login']
         password = data['password']
-        
-        user = auth.authenticate(username=username, password=password)
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        if "@" in login_credential:
+            if re.fullmatch(regex, login_credential):
+                try:
+                    user = User.objects.get(email=login_credential)
+                except:
+                    return JsonResponse({'response':'user does not exist'})
+                user = auth.authenticate(username = user.username, password=password)
+            else:
+                return JsonResponse({'response':'invalid email provided'})
+        else:
+            user = auth.authenticate(username=login_credential, password=password)
         
         if user is not None:
             auth.login(request, user)
-            get_profile = UserProfile.objects.get(username=username)
+            get_profile = UserProfile.objects.get(user__id=user.id)
             user_stories = Story.objects.filter(creator_id = get_profile.user.id)
             notifications_by_comments = [comment for user_story in user_stories for comment in user_story.comments.all()  if comment.replied_to == 0 and comment.read_by_user == False and comment.creator != get_profile.user.id]
             user_comments = Comments.objects.filter(creator=get_profile.user.id)
@@ -123,7 +136,7 @@ class LoginView(APIView):
             }
             return JsonResponse(user_data)
         else:
-            return JsonResponse({'response': False})
+            return JsonResponse({'response': 'user not found'})
         
 
 

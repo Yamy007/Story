@@ -9,11 +9,11 @@ from rest_framework.authtoken.models import Token
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     image = models.ImageField(upload_to='images/', default=None)
-    username = models.CharField(max_length=100)
+    username = models.CharField(max_length=100, unique=True)
     is_premium = models.BooleanField(default=False)
     first_name = models.CharField(default='', max_length=100)
     last_name = models.CharField(default='', max_length=100)
-    email = models.EmailField(default='', max_length=100)
+    email = models.EmailField(default='', max_length=100, unique=True)
     phone = models.CharField(default='', max_length=100)
     address = models.CharField(default='', max_length=100)
     bio = models.TextField(default='', max_length=10000)

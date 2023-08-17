@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 #from profanity_filter import ProfanityFilter
 from rest_framework.authentication import TokenAuthentication
+import os
 
 class GetUserProfilesView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -48,104 +49,117 @@ class UpdateUserProfile(APIView):
         data = self.request.data
         user_id = self.request.user.id
         try:
-            thumbnail = request.FILES['image']
-            update_user_picture = UserProfile.objects.get(user__id = user_id)
-            update_user_picture.image = thumbnail
-            update_user_picture.save()
-        except (MultiValueDictKeyError, KeyError):
-            pass
+            get_user = UserProfile.objects.get(user__id = user_id)
         except:
-            return JsonResponse({'error': 'didnt update the profile photo'})
+            return JsonResponse({'response':'error getting user Profile - bug'})
         
-        try:
-            first_name = data['first_name']
-            if any(symbol in first_name for symbol in set(punctuation)) or " " in first_name:
-                return JsonResponse({'error':'special symbols are not allowed in first_name'})
-            # if pf.is_profane(first_name):
-            #     return JsonResponse({'error':'bad words are not allowed'})
-            modify = UserProfile.objects.get(user__id = user_id)
-            modify.first_name = first_name.capitalize()
-            modify.save()
-        except (MultiValueDictKeyError, KeyError):
-            pass
-        except:
-            return JsonResponse({'error': 'didnt update the profile first_name'})
-            
-            
-        try:
-            last_name = data['last_name']
-            if any(symbol in last_name for symbol in set(punctuation)) or " " in last_name:
-                return JsonResponse({'error':'special symbols are not allowed in last_name'})
-            # if pf.is_profane(last_name):
-            #     return JsonResponse({'error':'bad words are not allowed'})
-            modify = UserProfile.objects.get(user__id = user_id)
-            modify.last_name = last_name.capitalize()
-            modify.save()
-        except (MultiValueDictKeyError, KeyError):
-            pass
-        except:
-            return JsonResponse({'error': 'didnt update the profile last_name'})
-            
-            
-        try:
-            email = data['email']
-            regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
-            if re.fullmatch(regex, email):
-                if User.objects.filter(email = email).exists():
-                    modify = UserProfile.objects.get(user__id = user_id)
-                    modify.email = email
-                    modify.save()
+        if get_user is not None:
+            try:
+                thumbnail = request.FILES['image']
+                
+                if get_user.image:
+                    try:
+                        os.remove(get_user.image.path)
+                    except:
+                        pass
+                    get_user.image = thumbnail
+                    get_user.save()
                 else:
-                    return JsonResponse({'error': 'email is already in use'})
-            else:
-                return JsonResponse({'error': 'invalid email'})
-                  
-        except (MultiValueDictKeyError, KeyError):
-            pass
-        except:
-            return JsonResponse({'error': 'didnt update the profile email'})
+                    get_user.image = thumbnail
+                    get_user.save()
+            except (MultiValueDictKeyError, KeyError):
+                pass
+            except:
+                return JsonResponse({'error': 'didnt update the profile photo'})
             
+            try:
+                first_name = data['first_name']
+                if any(symbol in first_name for symbol in set(punctuation)) or " " in first_name:
+                    return JsonResponse({'error':'special symbols are not allowed in first_name'})
+                # if pf.is_profane(first_name):
+                #     return JsonResponse({'error':'bad words are not allowed'})
+                get_user.first_name = first_name.capitalize()
+                get_user.save()
+            except (MultiValueDictKeyError, KeyError):
+                pass
+            except:
+                return JsonResponse({'error': 'didnt update the profile first_name'})
+                
+                
+            try:
+                last_name = data['last_name']
+                if any(symbol in last_name for symbol in set(punctuation)) or " " in last_name:
+                    return JsonResponse({'error':'special symbols are not allowed in last_name'})
+                # if pf.is_profane(last_name):
+                #     return JsonResponse({'error':'bad words are not allowed'})
+                get_user.last_name = last_name.capitalize()
+                get_user.save()
+            except (MultiValueDictKeyError, KeyError):
+                pass
+            except:
+                return JsonResponse({'error': 'didnt update the profile last_name'})
+                
+                
+            try:
+                email = data['email']
+                regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+                if re.fullmatch(regex, email):
+                    if User.objects.filter(email = email).exists():
+                        return JsonResponse({'error': 'email is already in use'})
+                        
+                    else:
+                        get_user.email = email
+                        get_user.save()
+                else:
+                    return JsonResponse({'error': 'invalid email'})
+                    
+            except (MultiValueDictKeyError, KeyError):
+                pass
+            except:
+                return JsonResponse({'error': 'didnt update the profile email'})
+                
+                
+            try:
+                phone = data['phone']
+                clean_phone = re.sub("[-/()!?]","", phone)
+                if clean_phone[1:].isnumeric():
+                    get_user.phone = clean_phone
+                    get_user.save()
+                else:
+                    return JsonResponse({'error':'phone number is incorrect'})
+            except (MultiValueDictKeyError, KeyError):
+                pass
+            except:
+                return JsonResponse({'error': 'didnt update the profile phone'})
+                
+                
+            try:
+                address = data['city']
+                # if pf.is_profane(address):
+                #     return JsonResponse({'error':'bad words are not allowed'})
+                get_user.address = address.capitalize()
+                get_user.save()
+            except (MultiValueDictKeyError, KeyError):
+                pass
+            except:
+                return JsonResponse({'error': 'didnt update the profile city'})
+                
+                
+            try:
+                bio = data['bio']
+                # get_user.bio = pf.censor(bio)
+                get_user.bio = bio
+                get_user.save()
+            except (MultiValueDictKeyError, KeyError):
+                pass
+            except:
+                return JsonResponse({'error': 'didnt update the profile bio'})
+        else:
+            return JsonResponse({'response': False})
+        
+        return JsonResponse({'response':True})
+        
             
-        try:
-            phone = data['phone']
-            clean_phone = re.sub("[-/()!?]","", phone)
-            if clean_phone[1:].isnumeric():
-                modify = UserProfile.objects.get(user__id = user_id)
-                modify.phone = clean_phone
-                modify.save()
-            else:
-                return JsonResponse({'error':'phone number is incorrect'})
-        except (MultiValueDictKeyError, KeyError):
-            pass
-        except:
-            return JsonResponse({'error': 'didnt update the profile phone'})
-            
-            
-        try:
-            address = data['city']
-            # if pf.is_profane(address):
-            #     return JsonResponse({'error':'bad words are not allowed'})
-            modify = UserProfile.objects.get(user__id = user_id)
-            modify.address = address.capitalize()
-            modify.save()
-        except (MultiValueDictKeyError, KeyError):
-            pass
-        except:
-            return JsonResponse({'error': 'didnt update the profile city'})
-            
-            
-        try:
-            bio = data['bio']
-            modify = UserProfile.objects.get(user__id = user_id)
-            # modify.bio = pf.censor(bio)
-            modify.bio = bio
-            modify.save()
-        except (MultiValueDictKeyError, KeyError):
-            pass
-        except:
-            return JsonResponse({'error': 'didnt update the profile bio'})
-            
-        return JsonResponse({'success': 'user profile successfully updated'})     
             
  
 class GetUserProfilePage(APIView):
@@ -156,17 +170,17 @@ class GetUserProfilePage(APIView):
     def post(self, request, format=None):
         user = self.request.user.id
         
-        # liked_stories = Story.objects.filter(liked_by__id = user).count()
-        # comments_made = Comments.objects.filter(creator = user).count()
-        # stories_made = Story.objects.filter(creator_id = user).count()
+        liked_stories = Story.objects.filter(liked_by__id = user).count()
+        comments_made = Comments.objects.filter(creator = user).count()
+        stories_made = Story.objects.filter(creator_id = user).count()
         user_profile = UserProfile.objects.get(user__id = user)
         response = UserProfileSerializer(user_profile)
         
         jsonresponse = {
             "user_data": response.data,
-            # "liked_stories": liked_stories,
-            # "number_of_comments_made_by_user": comments_made,
-            # "number_of_stories_made_by_user": stories_made,
+            "liked_stories": liked_stories,
+            "number_of_comments_made_by_user": comments_made,
+            "number_of_stories_made_by_user": stories_made,
         }
         return JsonResponse(jsonresponse)
     

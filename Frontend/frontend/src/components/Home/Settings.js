@@ -1,24 +1,28 @@
 import React, { useEffect, useState } from 'react'
 import { Avatar, Button, Container, Grid, TextField } from '@mui/material'
+import { useForm } from 'react-hook-form'
 import Cookies from 'js-cookie'
 import axios from 'axios'
 import { UserAuth } from '../api/user'
 
 export const Settings = () => {
 	const [avatar, setAvatar] = useState(null)
+	const {register, handleSubmit} = useForm()
+	const [data, setData] = useState([])
 
-	useEffect(() => {
-		const respose = UserAuth().check()
-		console.log(respose)
-	}, [])
+	// useEffect(() => {
+	// 	const respose = UserAuth().check()
+	// 	console.log(respose)
+	// }, [])
 
-	const handleSubmit = e => {
-		UserAuth().profileUpdate()
-		e.preventDefault()
+	const onSubmit = async data => {
+		setData(await UserAuth().profileUpdate(data))
+		const response = await UserAuth().profileUpdate(data)
+		console.log(response)
 	}
 	return (
 		<Container maxWidth='md' sx={{ paddingTop: '10vh' }}>
-			<form onSubmit={handleSubmit}>
+			<form onSubmit={handleSubmit(onSubmit)}>
 				<Grid container spacing={3} alignItems='center'>
 					<Grid item xs={12} align='center'>
 						<Avatar alt='User Photo' src='' />
@@ -30,14 +34,16 @@ export const Settings = () => {
 							label='First Name'
 							name='name'
 							margin='normal'
+							{...register('first_name')}
 						/>
 						<TextField
 							fullWidth
 							label='Last Name'
 							name='surname'
 							margin='normal'
+							{...register('last_name')}
 						/>
-						<TextField fullWidth label='Email' name='email' margin='normal' />
+						<TextField fullWidth label='Email' name='email' margin='normal' {...register('email')}/>
 						<TextField
 							fullWidth
 							label='Bio'
@@ -45,8 +51,9 @@ export const Settings = () => {
 							multiline
 							rows={4}
 							margin='normal'
+							{...register('bio')}
 						/>
-						<TextField fullWidth label='Phone' name='phone' margin='normal' />
+						<TextField fullWidth label='Phone' name='phone' margin='normal' {...register('phone')}/>
 						<TextField
 							fullWidth
 							label='Address'
@@ -54,6 +61,7 @@ export const Settings = () => {
 							multiline
 							rows={2}
 							margin='normal'
+							{...register('address')}
 						/>
 						<Button type='submit' variant='contained' color='primary'>
 							Save Changes

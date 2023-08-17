@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { UserAuth } from '../api/user'
 import { useNavigate } from 'react-router-dom'
 import styles from './style.module.css'
+import myInitObject from '../api/login_data'
 
 function checkStartingLetters(words, letters) {
 	if (letters === '') {
@@ -30,19 +31,23 @@ export const Login = ({ onSave }) => {
 	}, [onSave])
 
 	let redirect = useNavigate()
-	const onSubmit = async () => {
+	const onSubmit = async data => {
 		const check = await UserAuth().checkCookie()
-		const response = await UserAuth().login()
+		const response = await UserAuth().login(data)
+		setData(response)
 		onSave(prev => !prev)
-		if (response?.data.response) {
+		if (response?.data?.SUCCESS == "LOGGED IN") {
+			myInitObject = response
+			Object.freeze(myInitObject)
+			console.log(myInitObject)
 			return redirect('/')
 		}
 	}
-	const HandleSubmit = async e => {
-		const response = await UserAuth().profileUpdate()
-		console.log(response)
-		e.preventDefault()
-	}
+	// const HandleSubmit = async e => {
+	// 	const response = await UserAuth().profileUpdate()
+	// 	console.log(response)
+	// 	e.preventDefault()
+	// }
 	return (
 		<Box style={{ background: '#BCB8B8' }} className={styles.container}>
 			<form
@@ -55,6 +60,7 @@ export const Login = ({ onSave }) => {
 					type='text'
 					sx={{ width: '30vw' }}
 					onChange={e => setCheck(checkStartingLetters(data, e.target.value))}
+					{...register('username')}
 					error={!check}
 				/>
 				<TextField
@@ -71,7 +77,7 @@ export const Login = ({ onSave }) => {
 				>
 					Login
 				</Button>
-				<Button
+				{/* <Button
 					onClick={HandleSubmit}
 					type='submit'
 					variant='contained'
@@ -79,7 +85,7 @@ export const Login = ({ onSave }) => {
 					sx={{ width: '28vh' }}
 				>
 					Logissfn
-				</Button>
+				</Button> */}
 			</form>
 		</Box>
 	)

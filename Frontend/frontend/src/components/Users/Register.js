@@ -9,8 +9,10 @@ export const Register = ({ onSave }) => {
 	const [data, setData] = useState({})
 	const onSubmit = async data => {
 		onSave(prev => !prev)
-		setData(await UserAuth().Registration(data))
-		console.log(await UserAuth().Registration(data))
+		const check = await UserAuth().checkCookie()
+		const register = await UserAuth().Registration(data)
+		setData(register)
+		console.log(register)
 	}
 
 	return (
