@@ -11,18 +11,4 @@ AppBackend/pycache
 
 *.pyc
 
-AppBackend/pycache/
-backend/pycache/
-backend/migrations/pycache/
-AppBackend/pycache/init.cpython-311.pyc    
-AppBackend/pycache/settings.cpython-311.pyc    
-AppBackend/pycache/urls.cpython-311.pyc    
-AppBackend/pycache/wsgi.cpython-311.pyc    
-backend/pycache/init.cpython-311.pyc    
-backend/pycache/admin.cpython-311.pyc    
-backend/pycache/apps.cpython-311.pyc    
-backend/pycache/models.cpython-311.pyc    
-backend/pycache/urls.cpython-311.pyc    
-backend/pycache/views.cpython-311.pyc    
-backend/migrations/pycache/0001_initial.cpython-311.pyc    
-backend/migrations/pycache/init.cpython-311.pyc
+Frontend/
