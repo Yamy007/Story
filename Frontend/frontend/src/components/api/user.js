@@ -115,6 +115,21 @@ export const User = () => {
 			)
 			return response
 		},
+		profileUpdateImage: async (token, formData) => {
+			const response = await axios.post(
+				'http://127.0.0.1:8000/users/update_user_profile',
+				formData,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+						'X-CSRFToken': Cookies.get('csrftoken'),
+						Authorization: `Token ${token}`,
+					},
+					withCredentials: true,
+				}
+			)
+			return response
+		},
 		getAllUsers: async () => {
 			const response = await axios.get(
 				`${HostUrl}/auth/get_all_users`,
