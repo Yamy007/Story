@@ -15,12 +15,12 @@ import { FormControlLabel, Switch } from '@mui/material'
 import { Link } from 'react-router-dom'
 import { Logout } from '../Users/Logout'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 export const Header = ({ isDark, setIsDark, save, onSave }) => {
 	//const [isAuth, setIsAuth] = useState(false)
 	let redirect = useNavigate()
-
+	const dispatch = useDispatch()
 	const isAuth = useSelector(state => state.users.isAuthenticated)
 	const avatar =
 		useSelector(state => state.users.user.image) ||
@@ -52,7 +52,7 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 	const Action = type => {
 		if (type === 'Logout') {
 			onSave(prev => !prev)
-			Logout()
+			Logout(dispatch)
 		}
 		if (type === 'Register') {
 			return redirect('/user/register')

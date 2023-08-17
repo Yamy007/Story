@@ -27,6 +27,7 @@ export const Login = () => {
 	const dispatch = useDispatch()
 
 	const onSubmit = async data => {
+		console.log(data)
 		const response = await User().login(data)
 
 		if (response.data?.response || response.data?.SUCCESS) {
@@ -56,7 +57,7 @@ export const Login = () => {
 					label='username'
 					type='text'
 					sx={{ width: '30vw' }}
-					{...register('username', { required: true })}
+					{...register('login', { required: true })}
 					// onChange={e => setCheck(checkStartingLetters(data, e.target.value))}
 					// error={!check}
 				/>

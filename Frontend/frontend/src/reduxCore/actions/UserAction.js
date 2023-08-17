@@ -13,4 +13,15 @@ export const UserActions = {
 			payload: error,
 		}
 	},
+	setToken: token => {
+		return {
+			type: UserActionTypes.SET_TOKEN,
+			payload: token,
+		}
+	},
+	logout: () => {
+		return {
+			type: UserActionTypes.LOGOUT,
+		}
+	},
 }

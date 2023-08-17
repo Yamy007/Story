@@ -15,9 +15,9 @@ export const Register = () => {
 	const onSubmit = async data => {
 		const response = await User().registration(data)
 		setData(response)
-		const { username, password } = data
+		const { username: login, password } = data
 		if (response.data?.response) {
-			const response = await User().login({ username, password })
+			const response = await User().login({ login, password })
 			if (response.data?.response || response.data?.SUCCESS) {
 				localStorage.setItem(
 					'User',

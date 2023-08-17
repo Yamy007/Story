@@ -10,11 +10,20 @@ import { StoryInfo } from './components/Story/StoryInfo'
 import { Login } from './components/Users/Login'
 import { Register } from './components/Users/Register'
 import { Settings } from './components/Home/Settings'
+import { useDispatch } from 'react-redux'
+import { UserActions } from './reduxCore/actions/UserAction'
 function App() {
 	// console.log(UserApi())
 	const [isDark, setIsDark] = useState(true)
 	const [save, onSave] = useState(false)
-
+	const dispatch = useDispatch()
+	useEffect(() => {
+		const user = JSON.parse(localStorage.getItem('User'))
+		if (user) {
+			dispatch(UserActions.setUser(user.user))
+			dispatch(UserActions.setToken(user.token))
+		}
+	}, [dispatch])
 	return (
 		<ThemeProvider theme={isDark ? darkTheme : lightTheme}>
 			<Header
