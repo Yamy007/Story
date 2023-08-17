@@ -1,8 +1,12 @@
 import { composeWithDevTools } from '@redux-devtools/extension'
-import { combineReducers, compose, createStore } from 'redux'
+import { combineReducers, createStore } from 'redux'
+import { postReducer } from './reducers/postReducer'
+import { storyReducer } from './reducers/storyReducer'
 import { userReducer } from './reducers/userReducer'
 
 const rootReducer = combineReducers({
+	posts: postReducer,
+	story: storyReducer,
 	users: userReducer,
 })
 

@@ -2,7 +2,7 @@ from django.db import models
 from logingAPI.models import User, UserProfile
 from rest_framework import serializers
 # Create your models here.
-
+           
 class UserProfileCreatorSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile

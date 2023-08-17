@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework.authtoken',
     'backend',
     'corsheaders',
     'rest_framework',
@@ -131,9 +132,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORD = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAdminUser',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        
+        
     ],
     
 }
@@ -144,8 +150,19 @@ CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000','http://localhost:8000']
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:8000',
+]
 CORS_ORIGIN_WHITELIST = ['http://localhost:3000','http://localhost:8000']
 MEDIA_URL = "/media/"
 MEDIA_ROOT= os.path.join(BASE_DIR,"media/")
 
 
+<<<<<<< HEAD
+CSRF_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Strict'
+# CSRF_COOKIE_HTTPONLY = False  # False since we will grab it via universal-cookies
+# SESSION_COOKIE_HTTPONLY = False
+=======
+>>>>>>> main
