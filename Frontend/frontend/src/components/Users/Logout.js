@@ -1,4 +1,4 @@
-import { UserAuth } from '../api/user'
+import { User } from '../api/user'
 export const Logout = () => {
-	return UserAuth().logout()
+	return User().logout()
 }

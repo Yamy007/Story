@@ -1,52 +1,44 @@
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import {Buffer} from 'buffer';
-import myInitObject from './login_data';
+import { useSelector } from 'react-redux'
 
-axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
-axios.defaults.xsrfCookieName = "csrftoken";
-
-
-const username = "testuser2"
-const password = "pogkopi2004"
-
-const token = Buffer.from(`${username}:${password}`, 'utf8').toString('base64')
-
-export const UserAuth = () => {
-	return {
-		checkCookie: async () => {
-			const response = await axios.get(
-				'http://localhost:8000/auth/csrf_cookie',
-				{
-					withCredentials: true,
-				}
-			)
+const HostUrl = 'http://localhost:8000/'
+export const User = () => {
+	const UserAuth = {
+		getCookie: async () => {
+			const response = await axios.get(`${HostUrl}/auth/csrf_cookie`, {
+				withCredentials: true,
+			})
 			return response
 		},
 
 		login: async (data = { username: 'tester1', password: 'pogkopi2004' }) => {
+			if (!Cookies.get('csrftoken')) {
+				await User().getCookie()
+			} else {
+				console.log('Cookie already exist')
+			}
 			const response = await axios
-				.post('http://localhost:8000/auth/login', data, {
+				.post(`${HostUrl}/auth/login`, data, {
 					headers: {
 						'Content-Type': 'application/json',
-						"X-CSRFTOKEN": Cookies.get('csrftoken'),
+						'X-CSRFToken': Cookies.get('csrftoken'),
 					},
 					withCredentials: true,
-
 				})
 				.catch(err => console.log(err))
 			return response
 		},
 
-		check: async () => {
+		checkIsAuthentication: async token => {
 			const response = await axios
-				.post('http://localhost:8000/auth/auth_check', {}, {
-					withCredentials: true,
-					credentials: true,
+				.post(`${HostUrl}/auth/auth_check`, {
 					headers: {
-						// "X-CSRFTOKEN": Cookies.get('csrftoken'),
-						'Authorization': `Basic ${token}`,
+						'Content-Type': 'application/json',
+						'X-CSRFToken': Cookies.get('csrftoken'),
+						Authorization: `Token ${token}`,
 					},
+					withCredentials: true,
 				})
 				.catch(err => console.log(err))
 			return response
@@ -55,15 +47,14 @@ export const UserAuth = () => {
 		logout: async () => {
 			const response = await axios
 				.post(
-					'http://localhost:8000/auth/logout',
+					`${HostUrl}/auth/logout`,
 					{},
 					{
 						headers: {
 							'Content-Type': 'application/json',
-							"X-CSRFTOKEN": Cookies.get('csrftoken'),
+							'X-CSRFToken': Cookies.get('csrftoken'),
 						},
 						withCredentials: true,
-						credentials: true,
 					}
 				)
 				.catch(err => console.log(err))
@@ -79,28 +70,28 @@ export const UserAuth = () => {
 			}
 		) => {
 			const response = await axios
-				.post('http://localhost:8000/auth/register', data, {
+				.post(`${HostUrl}/auth/register`, data, {
 					headers: {
 						'Content-Type': 'application/json',
-						"X-CSRFTOKEN": Cookies.get('csrftoken'),
+						'X-CSRFToken': Cookies.get('csrftoken'),
 					},
 					withCredentials: true,
 				})
 				.catch(err => console.log(err))
 			return response
 		},
-		Profile: async () => {
+		getProfile: async token => {
 			try {
 				const response = await axios.post(
-					'http://localhost:8000/users/profile',
+					`${HostUrl}/users/profile`,
 					{},
 					{
 						headers: {
 							'Content-Type': 'application/json',
-							"X-CSRFTOKEN": Cookies.get('csrftoken'),
+							'X-CSRFToken': Cookies.get('csrftoken'),
+							// Authorization: `Token ${token}`,
 						},
 						withCredentials: true,
-						credentials: true,
 					}
 				)
 
@@ -109,29 +100,35 @@ export const UserAuth = () => {
 				return err
 			}
 		},
-		profileUpdate: async () => {
-			console.log(myInitObject)
-			try {
-				const response = await axios.post(
-					'http://127.0.0.1:8000/users/update_user_profile',
-					{
-						first_name: "tester1",
+		profileUpdate: async (token, data) => {
+			const response = await axios.post(
+				'http://127.0.0.1:8000/users/update_user_profile',
+				data,
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'X-CSRFToken': Cookies.get('csrftoken'),
+						Authorization: `Token ${token}`,
 					},
-					{
-						headers: {
-							'Content-Type': 'application/json',
-							'X-CSRFTOKEN': Cookies.get('csrftoken'),
-							'Authorization': 'Token  9ebda190c6b00dc7a75672c389745d5003b9024e',
-						},
-						withCredentials: true,
-						credentials: true,
-						
-					}
-				)
-				return response
-			} catch (err) {
-				return err
-			}
+					withCredentials: true,
+				}
+			)
+			return response
+		},
+		getAllUsers: async () => {
+			const response = await axios.get(
+				`${HostUrl}/auth/get_all_users`,
+				{},
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'X-CSRFToken': Cookies.get('csrftoken'),
+					},
+					withCredentials: true,
+				}
+			)
+			return response
 		},
 	}
+	return UserAuth
 }

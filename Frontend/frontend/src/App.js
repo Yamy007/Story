@@ -9,9 +9,7 @@ import { Storys } from './components/Story/Storys'
 import { StoryInfo } from './components/Story/StoryInfo'
 import { Login } from './components/Users/Login'
 import { Register } from './components/Users/Register'
-import { UserApi } from './components/Users/UserApi/UserApi'
 import { Settings } from './components/Home/Settings'
-import { UserAuth } from './components/api/user'
 
 function App() {
 	// console.log(UserApi())

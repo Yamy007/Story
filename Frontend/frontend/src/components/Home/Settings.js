@@ -3,7 +3,7 @@ import { Avatar, Button, Container, Grid, TextField } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import Cookies from 'js-cookie'
 import axios from 'axios'
-import { UserAuth } from '../api/user'
+import { User } from '../api/user'
 
 export const Settings = () => {
 	const [avatar, setAvatar] = useState(null)
@@ -11,13 +11,13 @@ export const Settings = () => {
 	const [data, setData] = useState([])
 
 	// useEffect(() => {
-	// 	const respose = UserAuth().check()
+	// 	const respose = User().check()
 	// 	console.log(respose)
 	// }, [])
 
 	const onSubmit = async data => {
-		setData(await UserAuth().profileUpdate(data))
-		const response = await UserAuth().profileUpdate(data)
+		const response = await User().profileUpdate(data)
+		setData(response)
 		console.log(response)
 	}
 	return (

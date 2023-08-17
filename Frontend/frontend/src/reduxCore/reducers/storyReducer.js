@@ -3,7 +3,6 @@ const initialState = {
 	page: {
 		story_page_count: 1,
 		story_current: 1,
-		number_of_pages: 1,
 	},
 	error: '',
 }

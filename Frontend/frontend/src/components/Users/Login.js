@@ -1,10 +1,9 @@
 import { Box, Button, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { UserAuth } from '../api/user'
+import { User } from '../api/user'
 import { useNavigate } from 'react-router-dom'
 import styles from './style.module.css'
-import myInitObject from '../api/login_data'
 
 function checkStartingLetters(words, letters) {
 	if (letters === '') {
@@ -32,19 +31,16 @@ export const Login = ({ onSave }) => {
 
 	let redirect = useNavigate()
 	const onSubmit = async data => {
-		const check = await UserAuth().checkCookie()
-		const response = await UserAuth().login(data)
+		const check = await User().checkCookie()
+		const response = await User().login(data)
 		setData(response)
 		onSave(prev => !prev)
 		if (response?.data?.SUCCESS == "LOGGED IN") {
-			myInitObject = response
-			Object.freeze(myInitObject)
-			console.log(myInitObject)
 			return redirect('/')
 		}
 	}
 	// const HandleSubmit = async e => {
-	// 	const response = await UserAuth().profileUpdate()
+	// 	const response = await User().profileUpdate()
 	// 	console.log(response)
 	// 	e.preventDefault()
 	// }

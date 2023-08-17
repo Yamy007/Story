@@ -2,15 +2,15 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Box, Button, TextField, Typography } from '@mui/material'
 import styles from './style.module.css'
-import { UserAuth } from '../api/user'
+import { User } from '../api/user'
 
 export const Register = ({ onSave }) => {
 	const { register, handleSubmit } = useForm()
 	const [data, setData] = useState({})
 	const onSubmit = async data => {
 		onSave(prev => !prev)
-		const check = await UserAuth().checkCookie()
-		const register = await UserAuth().Registration(data)
+		const check = await User().checkCookie()
+		const register = await User().Registration(data)
 		setData(register)
 		console.log(register)
 	}
