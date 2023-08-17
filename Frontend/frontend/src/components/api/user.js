@@ -1,5 +1,6 @@
 import axios from 'axios'
 import Cookies from 'js-cookie'
+<<<<<<< HEAD
 import { useSelector } from 'react-redux'
 
 const HostUrl = 'http://localhost:8000/'
@@ -20,11 +21,31 @@ export const User = () => {
 			}
 			const response = await axios
 				.post(`${HostUrl}/auth/login`, data, {
+=======
+
+export const UserAuth = () => {
+	return {
+		checkCookie: async () => {
+			const response = await axios.get(
+				'http://localhost:8000/auth/csrf_cookie',
+				{
+					credentials: true,
+				}
+			)
+			return response
+		},
+
+		login: async (data = { username: 'tester235', password: 'pogkopi2004' }) => {
+			const response = await axios
+				.post('http://localhost:8000/auth/login', data, {
+					withCredentials: true,
+					credentials: true,
+>>>>>>> main
 					headers: {
 						'Content-Type': 'application/json',
 						'X-CSRFToken': Cookies.get('csrftoken'),
 					},
-					withCredentials: true,
+					
 				})
 				.catch(err => console.log(err))
 			return response
@@ -50,11 +71,12 @@ export const User = () => {
 					`${HostUrl}/auth/logout`,
 					{},
 					{
+						withCredentials: true,
 						headers: {
 							'Content-Type': 'application/json',
 							'X-CSRFToken': Cookies.get('csrftoken'),
 						},
-						withCredentials: true,
+						
 					}
 				)
 				.catch(err => console.log(err))
@@ -70,12 +92,18 @@ export const User = () => {
 			}
 		) => {
 			const response = await axios
+<<<<<<< HEAD
 				.post(`${HostUrl}/auth/register`, data, {
+=======
+				.post('http://localhost:8000/auth/register', data, {
+					withCredentials: true,
+					credentials: true,
+>>>>>>> main
 					headers: {
 						'Content-Type': 'application/json',
 						'X-CSRFToken': Cookies.get('csrftoken'),
 					},
-					withCredentials: true,
+					
 				})
 				.catch(err => console.log(err))
 			return response

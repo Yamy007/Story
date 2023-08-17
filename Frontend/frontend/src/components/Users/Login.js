@@ -7,6 +7,7 @@ import styles from './style.module.css'
 import { UserActions } from '../../reduxCore/actions/UserAction'
 import { useDispatch } from 'react-redux'
 
+<<<<<<< HEAD
 // function checkStartingLetters(words, letters) {
 // 	if (letters === '') {
 // 		return true
@@ -19,6 +20,33 @@ import { useDispatch } from 'react-redux'
 // 	}
 // 	return false
 // }
+=======
+import { makeStyles } from '@mui/styles'
+
+const useStyles = makeStyles({
+	customTextField: {
+		'& .MuiOutlinedInput-root': {
+			borderColor: 'red', // Ось тут ви задаєте бажаний колір межі
+		},
+	},
+})
+
+function checkStartingLetters(words, letters) {
+	if (letters === '') {
+		return true
+	}
+	const pattern = new RegExp(`^${letters}`, 'i')
+	for (const word of words) {
+		if (pattern.test(word)) {
+			return true
+		}
+	}
+	return false
+}
+
+export const Login = ({ onSave }) => {
+	const classes = useStyles()
+>>>>>>> main
 
 export const Login = () => {
 	const { register, handleSubmit } = useForm()
@@ -57,9 +85,15 @@ export const Login = () => {
 					label='username'
 					type='text'
 					sx={{ width: '30vw' }}
+<<<<<<< HEAD
 					{...register('login', { required: true })}
 					// onChange={e => setCheck(checkStartingLetters(data, e.target.value))}
 					// error={!check}
+=======
+					onChange={e => setCheck(checkStartingLetters(data, e.target.value))}
+					{...register('username')}
+					error={!check}
+>>>>>>> main
 				/>
 				<TextField
 					label='password'

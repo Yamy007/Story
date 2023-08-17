@@ -18,9 +18,14 @@ import re
 
 
 class CheckAuthenticationStatus(APIView):
+<<<<<<< HEAD
     authentication_classes= [ SessionAuthentication ]
     
     def post(self, request, format=None):
+=======
+    @method_decorator(csrf_protect, name='dispatch')
+    def get(self, request, format=None):
+>>>>>>> main
         try:
             if request.user.is_authenticated:
                 return JsonResponse({'response': True})
@@ -33,7 +38,11 @@ class CheckAuthenticationStatus(APIView):
 
 class SignUpView(APIView):
     permission_classes = (permissions.AllowAny,)
+<<<<<<< HEAD
             
+=======
+    
+>>>>>>> main
     @method_decorator(csrf_protect, name='dispatch')
     def post(self, request, format=None):
         # pf = ProfanityFilter()
@@ -82,7 +91,7 @@ class SignUpView(APIView):
             else:
                 return JsonResponse({'response': 'passwords do not match'})
         except:
-            return JsonResponse({'response': False})     
+            return JsonResponse({'response': 'error during validation'})     
         
         try: 
             user_profile = UserProfile(user=upd_user_status, email=email, username = username)
@@ -90,11 +99,11 @@ class SignUpView(APIView):
             if superuser_secret_word == "isjxynasygaszgnxiasnuiqweruqiwe120942190142osidjadskamf":
                 user_profile.is_premium = True
                 user_profile.save()
-            return JsonResponse({'response':True})  
+            return JsonResponse({'response':'sucess'})  
         except:
             delete_user = User.objects.get(pk=upd_user_status.id)
             delete_user.delete()
-            return JsonResponse({'response': False})
+            return JsonResponse({'response': 'error during profile creation'})
            
         
  
@@ -116,6 +125,7 @@ class LoginView(APIView):
                     return JsonResponse({'response':'user does not exist'})
                 user = auth.authenticate(username = user.username, password=password)
             else:
+<<<<<<< HEAD
                 return JsonResponse({'response':'invalid email provided'})
         else:
             user = auth.authenticate(username=login_credential, password=password)
@@ -138,6 +148,11 @@ class LoginView(APIView):
         else:
             return JsonResponse({'response': 'user not found'})
         
+=======
+                return JsonResponse({'response': 'user probably doesnt exist or wrong credentials'})
+        except:
+            return JsonResponse({'response': 'error during logination'})
+>>>>>>> main
 
 
      
