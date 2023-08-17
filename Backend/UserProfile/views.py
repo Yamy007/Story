@@ -103,9 +103,8 @@ class UpdateUserProfile(APIView):
                 email = data['email']
                 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
                 if re.fullmatch(regex, email):
-                    if User.objects.filter(email = email).exists():
-                        return JsonResponse({'error': 'email is already in use'})
-                        
+                    if User.objects.filter(~Q(pk = get_user.id ),email = email).exists():
+                        return JsonResponse({'error': 'email is already in use'}) 
                     else:
                         get_user.email = email
                         get_user.save()
