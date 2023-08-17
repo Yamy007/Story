@@ -10,7 +10,7 @@ from string import punctuation
 from django.http import JsonResponse
 from UserProfile.serializer import UserProfileSerializer
 from backend.models import Story, Comments
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 import re
 
@@ -18,16 +18,16 @@ import re
 
 
 class CheckAuthenticationStatus(APIView):
-    authentication_classes= [ SessionAuthentication ]
+    authentication_classes= [ TokenAuthentication ]
     
     def post(self, request, format=None):
         try:
             if request.user.is_authenticated:
-                return JsonResponse({'response': True})
+                return JsonResponse({'response': True, "message":"користувач автентифікований"})
             else:
-                return JsonResponse({'response': False})
+                return JsonResponse({'response': False, "message":"користувач не автентифікований"})
         except:
-            return JsonResponse({'response':'something went wrong during authentication check'})
+            return JsonResponse({'response':False, "message":"щось пішло не так"})
         
         
 
@@ -51,21 +51,21 @@ class SignUpView(APIView):
         try:
             if password == re_password:
                 if User.objects.filter(username=username).exists():
-                    return JsonResponse({'response': 'account with that username already exists'})
+                    return JsonResponse({'response':False, "message":"акаунт з таким username уже існує"})
                 if len(password) < 8:
-                    return JsonResponse({'response': 'password is too short'})
+                    return JsonResponse({'response': False, "message":'пароль закороткий'})
                 if User.objects.filter(email=email).exists():
-                    return JsonResponse({'response': 'account with that email already exists'})
+                    return JsonResponse({'response': False, "message":"акаунт з таким email уже існує"})
                 if username in password:
-                    return JsonResponse({'response': 'password cannot contain part of username'})
+                    return JsonResponse({'response': False, "message":'пароль не може містити частину username'})
                 if password in username:
-                    return JsonResponse({'response': 'password cannot be part of username'})
+                    return JsonResponse({'response': False, "message":'пароль не може бути частиною username'})
                 if any(symbol in password for symbol in set(punctuation)):
-                    return JsonResponse({'response': 'password cannot contain special symbols'})
+                    return JsonResponse({'response': False, "message":'пароль не може містити спеціальні символи'})
                 if password.isnumeric():
-                    return JsonResponse({'response': 'password cannot be entirely numeric'})
+                    return JsonResponse({'response': False, "message":'пароль не може складатись лише з чисел'})
                 if any(symbol in username for symbol in set(punctuation)):
-                    return JsonResponse({'response': 'username cannot contain special symbols'})
+                    return JsonResponse({'response': False, "message":'username не може містити спеціальні символи'})
                 # if pf.is_profane(username):
                 #     return JsonResponse({'response':'username cannot contain bad words'})
                 
@@ -80,9 +80,9 @@ class SignUpView(APIView):
                     upd_user_status.is_admin = True
                     upd_user_status.save()
             else:
-                return JsonResponse({'response': 'passwords do not match'})
+                return JsonResponse({'response': False, "message":"паролі не збігаються"})
         except:
-            return JsonResponse({'response': False})     
+            return JsonResponse({'response': False, "message":"шось пішло не так під час реєстрації"})     
         
         try: 
             user_profile = UserProfile(user=upd_user_status, email=email, username = username)
@@ -90,11 +90,16 @@ class SignUpView(APIView):
             if superuser_secret_word == "isjxynasygaszgnxiasnuiqweruqiwe120942190142osidjadskamf":
                 user_profile.is_premium = True
                 user_profile.save()
-            return JsonResponse({'response':True})  
+            return JsonResponse({'response':True, "message":'акаунт створено'})  
         except:
-            delete_user = User.objects.get(pk=upd_user_status.id)
-            delete_user.delete()
-            return JsonResponse({'response': False})
+            try:
+                delete_user = User.objects.get(pk=upd_user_status.id)
+                delete_profile = UserProfile.objects.get(user__id=upd_user_status.id)
+                delete_profile.delete()
+                delete_user.delete()
+            except:
+                pass
+            return JsonResponse({'response': False,  "message":'помилка під час реєстрації'})
            
         
  
@@ -113,10 +118,10 @@ class LoginView(APIView):
                 try:
                     user = User.objects.get(email=login_credential)
                 except:
-                    return JsonResponse({'response':'user does not exist'})
+                    return JsonResponse({'response':False,  "message":'користувача з таким email не існує'})
                 user = auth.authenticate(username = user.username, password=password)
             else:
-                return JsonResponse({'response':'invalid email provided'})
+                return JsonResponse({'response':False, "message":'неправильний email (синтаксис)'})
         else:
             user = auth.authenticate(username=login_credential, password=password)
         
@@ -126,32 +131,33 @@ class LoginView(APIView):
             user_stories = Story.objects.filter(creator_id = get_profile.user.id)
             notifications_by_comments = [comment for user_story in user_stories for comment in user_story.comments.all()  if comment.replied_to == 0 and comment.read_by_user == False and comment.creator != get_profile.user.id]
             user_comments = Comments.objects.filter(creator=get_profile.user.id)
-            notifications_by_replies = Comments.objects.filter(replied_to__in = [user_comment.id for user_comment in user_comments if user_comment.id != get_profile.user.id]).count()
+            notifications_by_replies = Comments.objects.filter(replied_to__in = [user_comment.id for user_comment in user_comments if user_comment.creator != get_profile.user.id], read_by_user = False).count()
             token = Token.objects.get(user=user)
             user_data = {
-                "SUCCESS":"LOGGED IN",
+                "response":True,
+                "message":'корисутвач залогінився',
                 "user": UserProfileSerializer(get_profile).data,
                 "user_notifications": len(notifications_by_comments) + notifications_by_replies,
                 "token": token.key,
             }
             return JsonResponse(user_data)
         else:
-            return JsonResponse({'response': 'user not found'})
+            return JsonResponse({'response': False, "message":"користувача не знайдено"})
         
 
 
      
 class LogoutView(APIView):
-    authentication_classes= [ SessionAuthentication ]
+    authentication_classes= [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
     @method_decorator(csrf_protect, name='dispatch')  
     def post(self, request, format=None):
         try:
             auth.logout(request)
-            return JsonResponse({'response': True})
+            return JsonResponse({'response': True,  "message":'логаут спрацював'})
         except:
-            return JsonResponse({'response': False})   
+            return JsonResponse({'response': False,  "message":'логаут не спрацював'})   
         
          
 class CsrfTokenView(APIView):
