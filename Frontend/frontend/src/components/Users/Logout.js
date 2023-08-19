@@ -10,7 +10,6 @@ export const Logout = () => {
 	const redirect = useNavigate()
 	useEffect(() => {
 		dispatch(UserActions.logout())
-
 		return redirect('/')
 	})
 }

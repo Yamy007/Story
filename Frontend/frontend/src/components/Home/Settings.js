@@ -11,38 +11,29 @@ import {
 import Cookies from 'js-cookie'
 import axios from 'axios'
 import { User } from '../api/user'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { set, useForm } from 'react-hook-form'
+import { UserActions } from '../../redux/slice/UserSlice'
+import { baseURL } from '../../constants/urls'
 export const Settings = () => {
+	//redux
+	const dispatch = useDispatch()
+
 	//image
 	const [selectedImage, setSelectedImage] = useState(null)
-	const img = useSelector(state => state.users?.user?.image)
-	const avatar = 'http://127.0.0.1:8000' + img
-	const [image, setImage] = useState('')
+	const avatar = baseURL + useSelector(state => state.user.user.image)
+	const [image, setImage] = useState(avatar)
 
 	const handleImageChange = event => {
 		setSelectedImage(event.target.files[0])
 		setImage(URL.createObjectURL(event.target.files[0]))
 	}
-	const token = useSelector(state => state.users.token)
-	const formData = new FormData()
 
 	const handleUpload = async () => {
+		const formData = new FormData()
 		formData.append('image', selectedImage)
 		try {
-			const response = await axios.post(
-				'http://127.0.0.1:8000/users/update_user_profile',
-
-				formData,
-				{
-					headers: {
-						'Content-Type': 'multipart/form-data',
-						'X-CSRFToken': Cookies.get('csrftoken'),
-						Authorization: `Token ${token}`,
-					},
-					withCredentials: true,
-				}
-			)
+			const response = dispatch(await UserActions.updateImage(formData))
 			console.log('Image uploaded successfully', response.data)
 		} catch (error) {
 			console.error('Error uploading image', error)
@@ -54,8 +45,9 @@ export const Settings = () => {
 	const [message, setMessage] = useState('Alert now working')
 	const [notificationVisible, setNotificationVisible] = useState(false)
 
-	const { first_name, last_name, email, bio, phone, address } =
-		JSON.parse(localStorage.getItem('User'))?.user || {}
+	const { first_name, last_name, email, bio, phone, address } = useSelector(
+		state => state.user.user
+	)
 	const { register, handleSubmit } = useForm({
 		defaultValues: {
 			first_name: first_name,
@@ -66,23 +58,24 @@ export const Settings = () => {
 			address: address,
 		},
 	})
+
 	const onSubmit = async data => {
 		for (const key in data) {
 			if (data[key] === '') {
 				delete data[key]
 			}
 		}
-		const response = await User().profileUpdate(token, data)
-
-		if (response.data?.success) {
-			setType('success')
-			setMessage('Profile updated successfully')
-		} else {
-			setType('error')
-			setMessage('Profile updated failed')
-		}
-		setNotificationVisible(true)
-		setTimeout(() => setNotificationVisible(false), 5000)
+		const response = await dispatch(UserActions.updateProfile(data))
+		console.log(response)
+		// if (response.data?.success) {
+		// 	setType('success')
+		// 	setMessage('Profile updated successfully')
+		// } else {
+		// 	setType('error')
+		// 	setMessage('Profile updated failed')
+		// }
+		// setNotificationVisible(true)
+		// setTimeout(() => setNotificationVisible(false), 5000)
 	}
 
 	return (
@@ -165,7 +158,13 @@ export const Settings = () => {
 							margin='normal'
 							{...register('bio')}
 						/>
-						<TextField fullWidth label='Phone' name='phone' margin='normal' />
+						<TextField
+							fullWidth
+							label='Phone'
+							name='phone'
+							margin='normal'
+							{...register('phone')}
+						/>
 						<TextField
 							fullWidth
 							label='Address'
@@ -184,48 +183,3 @@ export const Settings = () => {
 		</Container>
 	)
 }
-
-// import React, { useState } from 'react'
-// import axios from 'axios'
-// import { useSelector } from 'react-redux'
-// import Cookies from 'js-cookie'
-
-// export const Settings = () => {
-// 	const [selectedImage, setSelectedImage] = useState(null)
-
-// 	const handleImageChange = event => {
-// 		setSelectedImage(event.target.files[0])
-// 	}
-// 	const token = useSelector(state => state.users.token)
-
-// 	const handleUpload = async () => {
-// 		const formData = new FormData()
-// 		formData.append('image', selectedImage)
-
-// 		try {
-// 			const response = await axios.post(
-// 				'http://127.0.0.1:8000/users/update_user_profile',
-
-// 				formData,
-// 				{
-// 					headers: {
-// 						'Content-Type': 'multipart/form-data',
-// 						'X-CSRFToken': Cookies.get('csrftoken'),
-// 						Authorization: `Token ${token}`,
-// 					},
-// 					withCredentials: true,
-// 				}
-// 			)
-// 			console.log('Image uploaded successfully', response.data)
-// 		} catch (error) {
-// 			console.error('Error uploading image', error)
-// 		}
-// 	}
-
-// 	return (
-// 		<div style={{ paddingTop: '20vh' }}>
-// 			<input type='file' onChange={handleImageChange} />
-// 			<button onClick={handleUpload}>Upload Image</button>
-// 		</div>
-// 	)
-// }
