@@ -57,9 +57,9 @@ class GetFilteredStories(APIView):
                 try:
                     filter_genre = [int(clean) for clean in filter_genre if clean != ""]
                 except ValueError:
-                    return JsonResponse({'response':False, 'message':'жанри введені неправильно'})
+                    return JsonResponse({'response':False, 'message':'Input genres are incorrect'})
                 except:
-                    return JsonResponse({'response':False, 'message':'невідома помилка'})
+                    return JsonResponse({'response':False, 'message':'unknown error'})
                 
                 if views == "True":
                     all_posts = Story.objects.filter(Q(title__icontains = search ) | Q(story_body__icontains = search), genres__in = filter_genre).order_by('-views').distinct()
@@ -106,9 +106,9 @@ class GetFilteredStories(APIView):
                 try:
                     filter_genre = [int(clean) for clean in filter_genre if clean != ""]
                 except ValueError:
-                    return JsonResponse({'response':False, 'message':'жанри введені неправильно'})
+                    return JsonResponse({'response':False, 'message':'Incorrect genre input'})
                 except:
-                    return JsonResponse({'response':False, 'message':'невідома помилка'})
+                    return JsonResponse({'response':False, 'message':'unknown error'})
                 if views == "True":
                     all_posts = Story.objects.filter(genres__in = filter_genre).order_by('-views').distinct()
                 elif views == "False":
@@ -135,13 +135,13 @@ class GetFilteredStories(APIView):
             search_response = [story.serialize_general() for story in page_obj.object_list]
             response = {
                     "response": True,
-                    "message":"отримано список історій",
+                    "message":f"received page {page_number} of stories",
                     "page": {
                         "current": page_obj.number,
                         "has_next": page_obj.has_next(),
                         "has_previous": page_obj.has_previous(),
                         "number_of_pages": paginated.num_pages,
-                        "number_of_stories": paginated.count
+                        "number_of_items": paginated.count
                     },
                     "data": search_response,
                     
@@ -153,15 +153,15 @@ class GetFilteredStories(APIView):
             page_obj = paginated.get_page(1)
             response = {
                 "response":False,
-                "message":'за пошуковим запитом нічого не знайдено, ось 5 рекомендацій',
+                "message":'nothing was found for this search request, here are 5 recommendations',
                 "page": {
                         "current": 1,
                         "has_next": False,
                         "has_previous": False,
                         "number_of_pages": 1,
-                        "number_of_stories": 0
+                        "number_of_items": 0
                     },
-                "recommendations": [story.serialize_general() for story in page_obj.object_list]
+                "data": [story.serialize_general() for story in page_obj.object_list]
             }
             return JsonResponse(response)
         
@@ -173,18 +173,18 @@ class GetDistinctStoryPage(APIView):
         story_id = request.GET.get('story', 0)
         story_page_number = request.GET.get('page', 1)
         if story_id == 0:
-            return JsonResponse({"response":False, "message":'відсутній ключ "story" історії в URL'})
+            return JsonResponse({"response":False, "message":'missing "story" key in URL'})
         else:
             try:
                 story = Story.objects.get(pk = story_id)
             except ObjectDoesNotExist:
-                response = f"історії з id={story_id} не існує"
+                response = f"story with id={story_id} does not exist"
                 return JsonResponse({'response': False, "message":response})
             except ValueError:
-                response = f'не той тип даних (URL запит: story= {story_id})'
+                response = f'value error (URL request: story= {story_id})'
                 return JsonResponse({'response':False, "message":response})
             except:
-                return JsonResponse({'response':False, 'message':'невідома помилка'})
+                return JsonResponse({'response':False, 'message':'unknown error'})
             
             clean_data = story.serialize()
             splitted_story = [(clean_data['story_body'][i:i+2000]) for i in range(0, len(clean_data['story_body']), 2000)]
@@ -192,14 +192,15 @@ class GetDistinctStoryPage(APIView):
             page_story_obj = paginated_story.get_page(story_page_number)
             response = {
                 "response":True,
-                "message":f"отримана {story_page_number} сторінка історії",
-                "story_page": {
-                    "story_page_count": paginated_story.num_pages,
-                    "story_current": page_story_obj.number,
-                    "story_has_next_page": page_story_obj.has_next(),
-                    "story_has_previous_page": page_story_obj.has_previous(),
+                "message":f"received page {story_page_number} of distinct story",
+                "page": {
+                    "number_of_pages": paginated_story.num_pages,
+                    "number_of_items":paginated_story.count,
+                    "current": page_story_obj.number,
+                    "has_next": page_story_obj.has_next(),
+                    "has_previous": page_story_obj.has_previous(),
                 },
-                "story_data": {
+                "data": {
                     "story_id":story.id,
                     "user_creator_id":story.creator_id,
                     "title": story.title,
@@ -223,13 +224,13 @@ class GetDistinctRelatedStoriesPage(APIView):
             try:
                 story = Story.objects.get(pk = id)
             except ObjectDoesNotExist:
-                response = f"історії з id={id} не існує"
+                response = f"story with id={story} does not exist"
                 return JsonResponse({'response': False, "message":response})
             except ValueError:
-                response = f'не той тип даних (URL запит: story= {id})'
+                response = f'value error (URL request: story= {id})'
                 return JsonResponse({'response':False, "message":response})
             except:
-                return JsonResponse({'response':False, 'message':'невідома помилка'})
+                return JsonResponse({'response':False, 'message':'unknown error'})
             
             genre = [genre.id for genre in story.genres.all()]
             related_storie = Story.objects.filter(genres__in = genre).order_by('-views').distinct()
@@ -237,25 +238,25 @@ class GetDistinctRelatedStoriesPage(APIView):
             page_obj = paginated.get_page(related_stories_page)
             if paginated.count == 0:
                 resp = False
-                msg = "відповідей на даний коментар немає"
+                msg = "there are no related stories to this one"
             else:
                 resp = True
-                msg = f"отримано сторінку з відповідями на конкретний коментар"
+                msg = f"received page {related_stories_page} of related stories"
             response = {
                 "response":resp,
                 "message":msg,
-                "related_page": {
+                "page": {
                     "current": page_obj.number,
-                    "has_next_page": page_obj.has_next(),
-                    "has_previous_page": page_obj.has_previous(),
+                    "has_next": page_obj.has_next(),
+                    "has_previous": page_obj.has_previous(),
                     "number_of_pages": paginated.num_pages,
-                    "number_of_stories": paginated.count       
+                    "number_of_items": paginated.count       
                 },
-                "related": [related_stories.serialize_general() for related_stories in page_obj.object_list if related_stories != story],
+                "data": [related_stories.serialize_general() for related_stories in page_obj.object_list if related_stories != story],
             }
             return JsonResponse(response)
         else:
-            return JsonResponse({'response':False, "message":'у запиті відсутній ключ story'})
+            return JsonResponse({'response':False, "message":'missing "story" key in URL'})
         
 class GetStoryCommentsPage(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -268,37 +269,37 @@ class GetStoryCommentsPage(APIView):
             try:
                 story = Story.objects.get(pk = story_id)
             except ObjectDoesNotExist:
-                response = f"історії з id={story_id} не існує"
+                response = f"story with id={story_id} does not exist"
                 return JsonResponse({'response': False, "message":response})
             except ValueError:
-                response = f'не той тип даних (URL запит: story= {story_id})'
+                response = f'value error (URL request: story= {story_id})'
                 return JsonResponse({'response':False, "message":response})
             except:
-                return JsonResponse({'response':False, 'message':'невідома помилка'})
+                return JsonResponse({'response':False, 'message':'unknown error'})
             
             paginated = Paginator(story.comments.filter(replied_to = 0), per_page=20)
             page_obj = paginated.get_page(comments_page)
             serialized_comments = [comments.serialize() for comments in page_obj.object_list if comments.replied_to == 0]
             if paginated.count == 0:
                 resp = False
-                msg = "коментарів під історією немає"
+                msg = "there are no comments to this story"
             else:
                 resp = True
-                msg = f"отримано сторінку з коментарями конкретної історії"
+                msg = f"received page {comments_page} of comments for this story"
             response = {
                 "response":resp,
                 "message":msg,
-                "comments_page":{
+                "page":{
                     "current": page_obj.number,
-                    "has_next_page": page_obj.has_next(),
-                    "has_previous_page": page_obj.has_previous(),
+                    "has_next": page_obj.has_next(),
+                    "has_previous": page_obj.has_previous(),
                     "number_of_pages": paginated.num_pages,
-                    "number_of_comments": paginated.count
+                    "number_of_items": paginated.count
                 },
-                "comment_data": serialized_comments}
+                "data": serialized_comments}
             return JsonResponse(response, safe = False)
         else:
-            return JsonResponse({'response':False, "message":'у запиті відсутній ключ story'})
+            return JsonResponse({'response':False, "message":'missing "story" key in URL'})
         
     
 class GetStoryCommentsReplies(APIView):
@@ -314,27 +315,27 @@ class GetStoryCommentsReplies(APIView):
                 page_obj = paginated.get_page(get_replies_page)
                 if paginated.count == 0:
                     resp = False
-                    msg = "відповідей на даний коментар немає"
+                    msg = "there are no replies to this commentary"
                 else:
                     resp = True
-                    msg = f"отримано {get_replies_page} сторінку з відповідями на конкретний коментар"
+                    msg = f"received page {get_replies_page} with replies to this comment"
                 response = {
                     "response":resp,
                     "message":msg,
-                    "comments_page":{
+                    "page":{
                         "current": page_obj.number,
-                        "has_next_page": page_obj.has_next(),
-                        "has_previous_page": page_obj.has_previous(),
+                        "has_next": page_obj.has_next(),
+                        "has_previous": page_obj.has_previous(),
                         "number_of_pages": paginated.num_pages,
-                        "number_of_comments": paginated.count
+                        "number_of_items": paginated.count
                     },
-                    "replies":[reply.serialize() for reply in page_obj.object_list]
+                    "data":[reply.serialize() for reply in page_obj.object_list]
                 }
             except:
-                return JsonResponse({'response':False, "message":"невідома помилка"})
+                return JsonResponse({'response':False, "message":"unknown error"})
             return JsonResponse(response)
         else:
-            return JsonResponse({'response':False, "message":"відсутній ключ reply_id"}) 
+            return JsonResponse({'response':False, "message":"missing 'reply_id' key in URL"}) 
     
 class SetViewForStory(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -346,18 +347,18 @@ class SetViewForStory(APIView):
             try:
                 get_story = Story.objects.get(pk=story)
             except ValueError:
-                response = f"помилка даних URL запит : story = {story})"
+                response = f"value error (URL request : story = {story})"
                 return JsonResponse({'response':False, "message":response})
             except ObjectDoesNotExist:
-                response = f"історії з id={story}, не існує"
+                response = f"story with id={story} does not exist"
                 return JsonResponse({'response':False, "message":response})
             except:
-                return JsonResponse({'response':False, "message":"невідома помилка"})
+                return JsonResponse({'response':False, "message":"unknown error"})
             get_story.views += 1
             get_story.save()
-            return JsonResponse({'response':True, "message":"перегляд додано"})
+            return JsonResponse({'response':True, "message":"view added"})
         else:
-            return JsonResponse({'response':False, "message":"у запиті відсутній ключ story"})
+            return JsonResponse({'response':False, "message":"missing 'story' key in URL"})
         
 #useless since i got getProfile page view ???????
 class GetStoryOrCommentCreator(APIView):
@@ -380,20 +381,20 @@ class GetStoryOrCommentCreator(APIView):
             try:  
                 get_user_profile = UserProfile.objects.get(user__id = user)
             except ObjectDoesNotExist:
-                response = f"профілю користувача не існує - баг, треба фіксити"
+                response = f"Profile does not exist - bug, requires fix"
                 return JsonResponse({'response':False, "message":response})
             except ValueError:
-                response = f"помилка даних  id користувача = {user})"
+                response = f"value error user_id = {user})"
                 return JsonResponse({'response':False, "message":response})
             set_user_profile_info = UserProfileCreatorSerializer(get_user_profile)
             response = {
                 'response':True,
-                'message':'отримано інформацію про користувача',
-                'user_data': set_user_profile_info.data
+                'message':'received user info',
+                'data': set_user_profile_info.data
             }
             return JsonResponse(response)
         else:
-            return JsonResponse({'response':False, "message":"у запиті відсутній ключ user"})   
+            return JsonResponse({'response':False, "message":"missing 'user' key in URL"})   
  
  
 class MarkAsRead(APIView):
@@ -406,11 +407,11 @@ class MarkAsRead(APIView):
             clean_data = [int(id) for id in comment.split(',') if id != '' or id != ' ']
         except:
 
-            return JsonResponse({'response':False, "message":f'неправильний ІД коментаря в запиті: comment={comment}'})
+            return JsonResponse({'response':False, "message":f'wrong comment_id in request : comment={comment}'})
         mark = Comments.objects.filter(pk__in = clean_data)
         mark.update(read_by_user = True)
 
-        return JsonResponse({'response':True, "message":f'коментар {comment} було позначено як прочитаний'}) 
+        return JsonResponse({'response':True, "message":f'comment id={comment} was marked as read'}) 
 
   
 class PlugFunc(APIView):     

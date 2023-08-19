@@ -9,4 +9,7 @@ urlpatterns = [
     path('logout', LogoutView.as_view()),
     path('get_all_users', GetUsersView.as_view()),
     path('all_users_info', GetUsersViewALL.as_view()),
+    
+    path('change_password', ChangePassword.as_view()),
+    path('reset_password', ResetPassword.as_view()),
 ]

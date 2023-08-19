@@ -148,21 +148,27 @@ CSRF_COOKIE_PATH = '/'
 CSRF_COOKIE_SAMESITE = 'Strict'  
 CSRF_COOKIE_SECURE = True
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000','http://localhost:8000']
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://127.0.0.1:3000', 
+]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'http://localhost:8000',
     'http://127.0.0.1:8000',
+    'http://127.0.0.1:3000', 
 ]
-CORS_ORIGIN_WHITELIST = ['http://localhost:3000','http://localhost:8000']
+# CORS_ORIGIN_WHITELIST = ['http://localhost:3000','http://localhost:8000']
 MEDIA_URL = "/media/"
 MEDIA_ROOT= os.path.join(BASE_DIR,"media/")
 
 
-<<<<<<< HEAD
 CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SAMESITE = 'Strict'
 # CSRF_COOKIE_HTTPONLY = False  # False since we will grab it via universal-cookies
 # SESSION_COOKIE_HTTPONLY = False
-=======
->>>>>>> main
+
+
