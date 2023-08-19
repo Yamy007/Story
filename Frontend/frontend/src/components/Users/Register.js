@@ -4,8 +4,9 @@ import { Box, Button, TextField, Typography } from '@mui/material'
 import styles from './style.module.css'
 import { User } from '../api/user'
 import { useNavigate } from 'react-router-dom'
-import { UserActions } from '../../reduxCore/actions/UserAction'
+// import { UserActions } from '../../reduxCore/actions/UserAction'
 import { useDispatch } from 'react-redux'
+import { UserActions } from '../../redux/slice/UserSlice'
 
 export const Register = () => {
 	const { register, handleSubmit } = useForm()
@@ -13,26 +14,27 @@ export const Register = () => {
 	let redirect = useNavigate()
 	const dispatch = useDispatch()
 	const onSubmit = async data => {
-		const response = await User().registration(data)
-		setData(response)
-		const { username: login, password } = data
-		if (response.data?.response) {
-			const response = await User().login({ login, password })
-			if (response.data?.response || response.data?.SUCCESS) {
-				localStorage.setItem(
-					'User',
-					JSON.stringify({
-						user: response.data.user,
-						token: response.data.token,
-					})
-				)
-				dispatch(UserActions.setToken(response.data.token))
-				dispatch(UserActions.setUser(response.data.user))
-				if (response?.data.SUCCESS) {
-					return redirect('/')
-				}
-			}
-		}
+		const response = await dispatch(UserActions.registration(data))
+		console.log(response)
+		// setData(response)
+		// const { username: login, password } = data
+		// if (response.data?.response) {
+		// 	const response = await User().login({ login, password })
+		// 	if (response.data?.response || response.data?.SUCCESS) {
+		// 		localStorage.setItem(
+		// 			'User',
+		// 			JSON.stringify({
+		// 				user: response.data.user,
+		// 				token: response.data.token,
+		// 			})
+		// 		)
+		// 		// dispatch(UserActions.setToken(response.data.token))
+		// 		// dispatch(UserActions.setUser(response.data.user))
+		// 		if (response?.data.SUCCESS) {
+		// 			return redirect('/')
+		// 		}
+		// 	}
+		// }
 	}
 
 	return (

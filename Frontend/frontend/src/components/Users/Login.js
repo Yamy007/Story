@@ -4,8 +4,9 @@ import { useForm } from 'react-hook-form'
 import { User } from '../api/user'
 import { useNavigate } from 'react-router-dom'
 import styles from './style.module.css'
-import { UserActions } from '../../reduxCore/actions/UserAction'
 import { useDispatch } from 'react-redux'
+import { UserActions } from '../../redux/slice/UserSlice'
+import { userService } from '../../services/userService'
 
 // function checkStartingLetters(words, letters) {
 // 	if (letters === '') {
@@ -23,27 +24,27 @@ import { useDispatch } from 'react-redux'
 export const Login = () => {
 	const { register, handleSubmit } = useForm()
 
-	let redirect = useNavigate()
+	// let redirect = useNavigate()
 	const dispatch = useDispatch()
 
 	const onSubmit = async data => {
 		console.log(data)
-		const response = await User().login(data)
-
-		if (response.data?.response || response.data?.SUCCESS) {
-			localStorage.setItem(
-				'User',
-				JSON.stringify({
-					user: response.data.user,
-					token: response.data.token,
-				})
-			)
-			dispatch(UserActions.setToken(response.data.token))
-			dispatch(UserActions.setUser(response.data.user))
-			if (response?.data.SUCCESS) {
-				return redirect('/')
-			}
-		}
+		const response = dispatch(UserActions.login(data))
+		console.log(response)
+		// if (response.data?.response || response.data?.SUCCESS) {
+		// 	localStorage.setItem(
+		// 		'User',
+		// 		JSON.stringify({
+		// 			user: response.data.user,
+		// 			token: response.data.token,
+		// 		})
+		// 	)
+		// dispatch(UserActions.setToken(response.data.token))
+		// dispatch(UserActions.setUser(response.data.user))
+		// 	if (response?.data.SUCCESS) {
+		// 		return redirect('/')
+		// 	}
+		// }
 	}
 
 	return (

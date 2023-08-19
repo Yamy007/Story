@@ -1,24 +1,21 @@
 import React, { useEffect } from 'react'
-import { useState } from 'react'
 import { Container } from '../Home/Container'
-import { PostActions } from '../../reduxCore/actions/PostActions.js'
-import { useDispatch } from 'react-redux'
-import { StoryFetch } from './StoryApi/StoryFetch'
+import { useDispatch, useSelector } from 'react-redux'
+import { storyActions } from '../../redux/slice/StorySlice'
 
 export const Storys = ({ isDark }) => {
-	const [page, setPage] = useState(1)
-
 	const dispatch = useDispatch()
+	const { page } = useSelector(state => state.story) || {}
+	const FetchData = async page => {
+		dispatch(storyActions.allStory(page))
+	}
 	useEffect(() => {
-		const FetchData = async () => {
-			dispatch(PostActions.setPost(await StoryFetch.getStory(page)))
-		}
-		FetchData()
-	}, [dispatch, page])
+		FetchData(page?.current || 1)
+	}, [])
 
 	return (
 		<>
-			<Container setPage={setPage} isDark={isDark} />
+			<Container isDark={isDark} />
 		</>
 	)
 }

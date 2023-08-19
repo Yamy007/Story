@@ -4,22 +4,21 @@ import { useParams } from 'react-router-dom'
 import styles from './Style/Style.module.css'
 import { StoryActions } from '../../reduxCore/actions/StoryActions.js'
 import { useDispatch, useSelector } from 'react-redux'
-import { StoryFetch } from './StoryApi/StoryFetch'
+import { storyActions } from '../../redux/slice/StorySlice'
 
 export const StoryInfo = ({ isDark }) => {
 	const { id } = useParams()
 	const dispatch = useDispatch()
 	const story = useSelector(state => state.story.data)
-	const allPage = useSelector(state => state.story.page.story_page_count)
-
-	const [page, setPage] = useState(1)
+	const { number_of_pages: allPage } = useSelector(state => state.story.page)
+	const { current: page } = useSelector(state => state.story.page)
 
 	useEffect(() => {
 		const FetchData = async () => {
-			dispatch(StoryActions.setStory(await StoryFetch.getStoryInfo(id, page)))
+			dispatch(storyActions.getStory({ id, page }))
 		}
 		FetchData()
-	}, [dispatch, id, page])
+	}, [dispatch, id])
 
 	return (
 		<Box bgcolor={isDark ? '#000000e8' : '#EBEBEB'} className={styles.wrapper}>
@@ -39,7 +38,7 @@ export const StoryInfo = ({ isDark }) => {
 				count={allPage}
 				page={page}
 				onChange={(e, newPage) => {
-					setPage(newPage)
+					dispatch(storyActions.getStory({ id, newPage }))
 				}}
 			/>
 		</Box>
