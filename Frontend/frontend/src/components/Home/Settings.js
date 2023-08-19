@@ -60,11 +60,6 @@ export const Settings = () => {
 	})
 
 	const onSubmit = async data => {
-		for (const key in data) {
-			if (data[key] === '') {
-				delete data[key]
-			}
-		}
 		const response = await dispatch(UserActions.updateProfile(data))
 		console.log(response)
 		// if (response.data?.success) {
