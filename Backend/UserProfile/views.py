@@ -30,9 +30,9 @@ class GetUserProfilesView(APIView):
             
         if users: 
             users = UserProfileSerializer(users, many=True)
-            return JsonResponse(users.data, safe=False)
+            return JsonResponse({"response":True, "message":"користувачів знайдено", "data":users.data}, safe=False)
         else:
-            return JsonResponse({'error':'none found'})
+            return JsonResponse({"response":False, "message":"користувачів не знайдено"})
    
     
 class UpdateUserProfile(APIView):
@@ -50,31 +50,34 @@ class UpdateUserProfile(APIView):
         try:
             get_user = UserProfile.objects.get(user__id = user_id)
         except:
-            return JsonResponse({'response':'error getting user Profile - bug'})
+            return JsonResponse({'response':"профілю не існує - баг, або неправильний id користувача"})
         
         if get_user is not None:
             try:
                 thumbnail = request.FILES['image']
-                
-                if get_user.image:
-                    try:
-                        os.remove(get_user.image.path)
-                    except:
-                        pass
-                    get_user.image = thumbnail
-                    get_user.save()
+                if thumbnail.name.endswith(('.jpg', '.png', '.jpeg')):
+                    if get_user.image:
+                        try:
+                            os.remove(get_user.image.path)
+                        except:
+                            pass
+                        get_user.image = thumbnail
+                        get_user.save()
+                    else:
+                        get_user.image = thumbnail
+                        get_user.save()
                 else:
-                    get_user.image = thumbnail
-                    get_user.save()
+                    return JsonResponse({'response':False, "message":"неправильні дані (доступні розширення фалів: .jpg, .png, .jpeg)"})
+                
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
-                return JsonResponse({'error': 'didnt update the profile photo'})
+                return JsonResponse({"response":False,  "message": 'помилка під час зміни фото профілю користувача'})
             
             try:
                 first_name = data['first_name']
                 if any(symbol in first_name for symbol in set(punctuation)) or " " in first_name:
-                    return JsonResponse({'error':'special symbols are not allowed in first_name'})
+                    return JsonResponse({'response':False, "message":'спеціальні символи в імені заборонені'})
                 # if pf.is_profane(first_name):
                 #     return JsonResponse({'error':'bad words are not allowed'})
                 get_user.first_name = first_name.capitalize()
@@ -82,13 +85,13 @@ class UpdateUserProfile(APIView):
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
-                return JsonResponse({'error': 'didnt update the profile first_name'})
+                return JsonResponse({"response":False,  "message": 'помилка під час зміни імені профілю користувача'})
                 
                 
             try:
                 last_name = data['last_name']
                 if any(symbol in last_name for symbol in set(punctuation)) or " " in last_name:
-                    return JsonResponse({'error':'special symbols are not allowed in last_name'})
+                    return JsonResponse({'response':False, "message":'спеціальні символи в прізвищі заборонені'})
                 # if pf.is_profane(last_name):
                 #     return JsonResponse({'error':'bad words are not allowed'})
                 get_user.last_name = last_name.capitalize()
@@ -96,25 +99,25 @@ class UpdateUserProfile(APIView):
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
-                return JsonResponse({'error': 'didnt update the profile last_name'})
+                return JsonResponse({"response":False,  "message": 'помилка під час зміни прізвища профілю користувача'})
                 
                 
             try:
                 email = data['email']
                 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
                 if re.fullmatch(regex, email):
-                    if User.objects.filter(~Q(pk = get_user.id ),email = email).exists():
-                        return JsonResponse({'error': 'email is already in use'}) 
+                    if User.objects.filter(~Q(pk = get_user.id ), email = email).exists():
+                        return JsonResponse({'response':False, "message":'email уже використовується'}) 
                     else:
                         get_user.email = email
                         get_user.save()
                 else:
-                    return JsonResponse({'error': 'invalid email'})
+                    return JsonResponse({'response': False, "message":'неправильний email (синтаксис)'})
                     
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
-                return JsonResponse({'error': 'didnt update the profile email'})
+                return JsonResponse({'response': False, "message":'помилка під час зміни email профілю користувача'})
                 
                 
             try:
@@ -124,15 +127,15 @@ class UpdateUserProfile(APIView):
                     get_user.phone = clean_phone
                     get_user.save()
                 else:
-                    return JsonResponse({'error':'phone number is incorrect'})
+                    return JsonResponse({'response': False, "message":'неправильний телефон (синтаксис)'})
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
-                return JsonResponse({'error': 'didnt update the profile phone'})
+                return JsonResponse({'response': False, "message":'помилка під час зміни телефону профілю користувача'})
                 
                 
             try:
-                address = data['city']
+                address = data['address']
                 # if pf.is_profane(address):
                 #     return JsonResponse({'error':'bad words are not allowed'})
                 get_user.address = address.capitalize()
@@ -140,7 +143,7 @@ class UpdateUserProfile(APIView):
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
-                return JsonResponse({'error': 'didnt update the profile city'})
+                return JsonResponse({'response': False, "message":'помилка під час зміни адреси (міста) профілю користувача'})
                 
                 
             try:
@@ -151,11 +154,11 @@ class UpdateUserProfile(APIView):
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
-                return JsonResponse({'error': 'didnt update the profile bio'})
+                return JsonResponse({'response': False, "message":'помилка під час зміни біографії профілю користувача'})
         else:
-            return JsonResponse({'response': False})
+            return JsonResponse({'response': False, "message":"користувача не існує"})
         
-        return JsonResponse({'response':True})
+        return JsonResponse({'response':True, "message":"профіль користувача успішно оновлено", "data": UserProfileSerializer(get_user).data})
         
             
             
@@ -175,6 +178,8 @@ class GetUserProfilePage(APIView):
         response = UserProfileSerializer(user_profile)
         
         jsonresponse = {
+            "response": True,
+            "message":"отримано сторінку профілю користувача",
             "user_data": response.data,
             "liked_stories": liked_stories,
             "number_of_comments_made_by_user": comments_made,
@@ -194,7 +199,15 @@ class GetUserLikedPosts(APIView):
         liked_posts = Story.objects.filter(liked_by__id = user.id).order_by('-views').distinct()
         paginated = Paginator(liked_posts, per_page=10)
         page_obj = paginated.get_page(related_page_number)
+        if paginated.count == 0:
+            resp = False
+            message = "користувач не лайкнув жодної історії"
+        else:
+            resp = True
+            message = "отримано лайкнуті користувачем історії"
         response = {
+            "response": resp,
+            "message": message,
             "liked_stories_page": {
                 "story_page_count": paginated.num_pages,
                 "story_current": page_obj.number,
@@ -217,7 +230,15 @@ class GetUser_MadeComments(APIView):
         comments = Comments.objects.filter(creator = user)
         paginated = Paginator(comments, per_page=10)
         page_obj = paginated.get_page(com_page)
+        if paginated.count == 0:
+            resp = False
+            message = "користувач не залишив жодного коментаря"
+        else:
+            resp = True
+            message = "отримано коментарі зроблені користувачем"
         response = {
+            "response":resp,
+            "message":message,
             "comments_page": {
                 "comments_count": paginated.num_pages,
                 "comments_current": page_obj.number,
@@ -242,19 +263,19 @@ class CreateOrUpdateUserStory(APIView):
         try:
             story_title = data['title']
         except:
-            return JsonResponse({'response':'story has to have title'})
+            return JsonResponse({'response':False, "message":"історія повинна мати заголовок (title)"})
         
         try:
             story_body = data['body']
         except:
-            return JsonResponse({'response':'story has to have body'})
+            return JsonResponse({'response':False, "message":'історія повинна мати тіло (body)'})
         
         try:
             story_genres_ids = data['genres']
             clean_genres = story_genres_ids.split(",")
             clean_genres_data = [int(item) for item in clean_genres if item != '']
         except:
-            return JsonResponse({'response':'story has to have atleast one genre'})
+            return JsonResponse({'response':False, "message":"історія повинна мати хоча б один жанр"})
         
         try:
             to_update = data['update']
@@ -267,9 +288,9 @@ class CreateOrUpdateUserStory(APIView):
                     story.save()
                 story.title = story_title + " (Edit)"
                 story.save()
-                return JsonResponse({'response':'sucessfully updated'})
+                return JsonResponse({'response':True, "message":"історію успішно оновлено/редаговано"})
             else:
-                return JsonResponse({'response':'wrong request user'})
+                return JsonResponse({'response':False, "message":"не той користувач"})
         except:
             pass
         # story_title = pf.censor(story_title)
@@ -284,7 +305,7 @@ class CreateOrUpdateUserStory(APIView):
             user_story.genres.add(genre.id)
             user_story.save()
         
-        return JsonResponse({'response':'story successfully created'})
+        return JsonResponse({'response':True, "message":"історію успішно створено"})
         
 class GetUser_MadeStories(APIView):
     authentication_classes = [ TokenAuthentication ]
@@ -296,7 +317,15 @@ class GetUser_MadeStories(APIView):
         user_stories = Story.objects.filter(creator_id = user)
         paginated = Paginator(user_stories, per_page=10)
         page_obj = paginated.get_page(story_page)
+        if paginated.count == 0:
+            resp = False
+            message = "користувач не створив жодної історії"
+        else:
+            resp = True
+            message = "отримано історії зроблені користувачем"
         response = {
+            "response":resp,
+            "message":message,
             "stories_page": {
                 "story_page_count": paginated.num_pages,
                 "story_current": page_obj.number,
@@ -316,21 +345,28 @@ class LikeUnlikeStory(APIView):
         user = self.request.user.id
         
         story_id = request.GET.get('story', None)
-        
+        try:
+            story_id = int(story_id)
+        except:
+            return JsonResponse({"response":False, "message":"неправильний id історії"})
         
         if story_id:
-            story = Story.objects.get(pk = story_id)
+            try:
+                story = Story.objects.get(pk = story_id)
+            except ObjectDoesNotExist:
+               return JsonResponse({'response':False, "message":"такої історії не існує"})
+            except:
+                return JsonResponse({'response':False, "message":"неправильний id історії"})
             if story.creator_id == user:
-                return JsonResponse({'response':'cant like your own story'})
+                return JsonResponse({'response':False, "message":"не можна лайкати свою історію"})
             if Story.objects.filter(pk = story_id, liked_by = user).exists():
                 story.liked_by.remove(user)
             else:
                 story.liked_by.add(user)
                 
             story.save()
-            return JsonResponse({'response':'like func success'})
-        else:
-            return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
+            return JsonResponse({'response':True, "message":"історію лайкнуто"})
+
         
 class CommentStoryOrReplyToCommentOrEditComment(APIView):
     authentication_classes = [ TokenAuthentication ]
@@ -347,30 +383,30 @@ class CommentStoryOrReplyToCommentOrEditComment(APIView):
         try:
             comment_body = data['comment']
         except:
-            return JsonResponse({'response':'wrong input (missing "comment" key in body)'})   
+            return JsonResponse({'response':False, "message":"у запиті відсутній ключ comment (body)"})   
         
         if edit:
             try:
                 to_edit = Comments.objects.get(pk = edit)
             except ObjectDoesNotExist:
-                response = f"comment with id={edit} doesnt exist"
-                return JsonResponse({'response': response})
+                response = f"коментаря з id={edit} не існує"
+                return JsonResponse({'response': False, "message":response})
             except ValueError:
-                response = f'value error (request URL: edit= {edit})'
-                return JsonResponse({'response':response})
+                response = f'помилка даних URL запит: edit= {edit})'
+                return JsonResponse({'response':False, "message":response})
             except:
-                return JsonResponse({'response':'unknown error'})
+                return JsonResponse({'response':False, "message":"невідома помилка"})
             
             if to_edit.creator != user:
-                return JsonResponse({'response':'wrong request user'})
+                return JsonResponse({'response':False, "message":"не той користувач"})
             to_edit.comment_body += "\n\n(Edit): " + comment_body
             to_edit.save()
-            return JsonResponse({"response":"comment was successfully edited"})
+            return JsonResponse({"response":True, "message":"коментар успішно оновлено"})
         
         try:
             story_id = data['story']
         except:
-            return JsonResponse({'response':'wrong input (missing "story" key in body)'})
+            return JsonResponse({'response':False, "message":"відсутній ключ story у запиті"})
         
         
         
@@ -387,31 +423,32 @@ class CommentStoryOrReplyToCommentOrEditComment(APIView):
             try:
                 story = Story.objects.get(pk = story_id)    
             except ObjectDoesNotExist:
-                response = f"story with id={story_id} doesnt exist"
-                return JsonResponse({'response': response})
+                response = f"історії з id={story_id} не існує"
+                return JsonResponse({'response': False, "message":response})
             except ValueError:
-                response = f'value error (request URL: story= {story_id})'
-                return JsonResponse({'response':response})
+                response = f'помилка даних URL запит: story= {story_id})'
+                return JsonResponse({'response': False, "message":response})
             except:
-                return JsonResponse({'response':'unknown error'})
+                return JsonResponse({'response': False, "message":"невідома помилка"})
             
             if reply:
                 if len([comm for comm in story.comments.all() if comm.replied_to != 0 and comm.creator == user]) == 5:
-                    return JsonResponse({'response':'comment wasnt added, only 5 replies per post available'})
+                    return JsonResponse({'response':False, "message":"коментар не створено, дозволено робити лише 5 відповідей на коментар під історією"})
                 else:
                     create_comment = Comments(creator = user, comment_body=comment_body, replied_to = reply)
+                    
             else:
                 if len([comm for comm in story.comments.all() if comm.replied_to == 0 and comm.creator == user]) == 5:
-                    return JsonResponse({'response':'comment wasnt added, only 5 comments per post available'})
+                    return JsonResponse({'response':False, "message":"коментар не створено, дозволено робити лише 5 коментарів під історією"})
                 else:
                     create_comment = Comments(creator = user, comment_body=comment_body)
                 
             create_comment.save()
             story.comments.add(create_comment)
             story.save()
-            return JsonResponse({'response':'commented succesfully'})
+            return JsonResponse({'response':True, "message":"коментар успішно створено"})
         else:
-            return JsonResponse({'response':'wrong input (missing "story" key in URL)'})
+            return JsonResponse({'response':False, "message":"у запиті відсутній id історії"})
                 
            
 class LikeUnlikeComment(APIView):
@@ -425,16 +462,16 @@ class LikeUnlikeComment(APIView):
         if comment:
             liked_comment = Comments.objects.get(pk = comment)
             if liked_comment.creator == user:
-                return JsonResponse({'response':'cant like your own comment'})
+                return JsonResponse({'response':False, "message":"не можна лайкнути власний коментар"})
             if Comments.objects.filter(pk = comment, liked_by=user).exists():
                 liked_comment.liked_by.remove(user)
             else:
                 liked_comment.liked_by.add(user)
             
             liked_comment.save()
-            return JsonResponse({'response':'like comment func success'})
+            return JsonResponse({'response':True, "message":"коментар лайкнуто"})
         else:
-            return JsonResponse({'response':'wrong input (missing "comment" key in URL)'})
+            return JsonResponse({'response':False, "message":"у запиті відсутній ключ comment"})
         
         
 class GetDistinctUserNotificationMessages(APIView):
@@ -456,7 +493,7 @@ class GetDistinctUserNotificationMessages(APIView):
             st['new_comments'] = len([coo for coo in story.comments.all() if coo.read_by_user == False and coo.creator != user and coo.replied_to == 0])
             if st['new_comments'] > 0:
                 response.append(st)
-            
+        print(st)
         for comment in user_comments:
             sto = Story.objects.get(comments__id = comment.id)
             cm = {}
@@ -468,8 +505,15 @@ class GetDistinctUserNotificationMessages(APIView):
         
         paginated = Paginator(response, per_page=5)
         page_obj = paginated.get_page(notification_page)
-        
+        if paginated.count == 0:
+            resp = False
+            message = "у користувача немає жодного нового сповіщення"
+        else:
+            resp = True
+            message = "отримано сповіщення користувача"
         final = {
+            "response":resp,
+            "message":message,
             "notification_page":{
                 "notification_page_count": paginated.num_pages,
                 "notification_current": page_obj.number,
