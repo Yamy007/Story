@@ -12,50 +12,21 @@ import Cookies from 'js-cookie'
 import axios from 'axios'
 import { User } from '../api/user'
 import { useSelector } from 'react-redux'
-import { useForm } from 'react-hook-form'
+import { set, useForm } from 'react-hook-form'
 export const Settings = () => {
-	//state
-
-	//token
-	const token = useSelector(state => state.users.token)
-
-	//notification -------
-	const [type, setType] = useState('info') //1: 'success', 2: 'error', 3: 'warning', 4: 'info',
-	const [message, setMessage] = useState('Alert now working')
-	const [notificationVisible, setNotificationVisible] = useState(false)
-	//notification -------
-
-	//image ----------
+	//image
 	const [selectedImage, setSelectedImage] = useState(null)
-	const [image, setImage] = useState('')
 	const img = useSelector(state => state.users?.user?.image)
 	const avatar = 'http://127.0.0.1:8000' + img
-	//image ----------
+	const [image, setImage] = useState('')
 
-	//image innit
-	useEffect(() => {
-		const image = JSON.parse(localStorage.getItem('User'))?.user?.image
-		if (image) {
-			setImage(image)
-		}
-	}, [])
-
-	//notification function
-	const notification = (type, message) => {
-		setType(type)
-		setMessage(message)
-		setNotificationVisible(true)
-		setTimeout(() => setNotificationVisible(false), 5000)
-	}
-
-	//image upload
 	const handleImageChange = event => {
 		setSelectedImage(event.target.files[0])
 		setImage(URL.createObjectURL(event.target.files[0]))
 	}
-
+	const token = useSelector(state => state.users.token)
 	const formData = new FormData()
-	const data = JSON.parse(localStorage.getItem('User'))
+
 	const handleUpload = async () => {
 		formData.append('image', selectedImage)
 		try {
@@ -72,18 +43,6 @@ export const Settings = () => {
 					withCredentials: true,
 				}
 			)
-			if (response.data?.response) {
-				setType('success')
-				const newData = {
-					...data,
-					user: { ...data.user, image: image },
-				}
-				localStorage.setItem('User', JSON.stringify(newData))
-				notification('success', 'Profile image updated successfully')
-				setSelectedImage(null)
-			} else {
-				notification('error', 'Profile image updated failed')
-			}
 			console.log('Image uploaded successfully', response.data)
 		} catch (error) {
 			console.error('Error uploading image', error)
@@ -91,6 +50,9 @@ export const Settings = () => {
 	}
 
 	//data
+	const [type, setType] = useState('info') //1: 'success', 2: 'error', 3: 'warning', 4: 'info',
+	const [message, setMessage] = useState('Alert now working')
+	const [notificationVisible, setNotificationVisible] = useState(false)
 
 	const { first_name, last_name, email, bio, phone, address } =
 		JSON.parse(localStorage.getItem('User'))?.user || {}
@@ -111,20 +73,18 @@ export const Settings = () => {
 			}
 		}
 		const response = await User().profileUpdate(token, data)
-		console.log(response)
-		if (response.data?.response) {
-			notification('success', 'Profile updated successfully')
-			const newData = {
-				user: { ...data.user, ...data },
-				token: token,
-			}
-			localStorage.setItem('User', JSON.stringify(newData))
+
+		if (response.data?.success) {
+			setType('success')
+			setMessage('Profile updated successfully')
 		} else {
-			notification('error', 'Profile updated failed')
+			setType('error')
+			setMessage('Profile updated failed')
 		}
+		setNotificationVisible(true)
+		setTimeout(() => setNotificationVisible(false), 5000)
 	}
-	const user = JSON.parse(localStorage.getItem('User'))
-	console.log(user)
+
 	return (
 		<Container maxWidth='md' sx={{ paddingTop: '10vh' }}>
 			<Grid container spacing={3} alignItems='center'>
@@ -168,7 +128,6 @@ export const Settings = () => {
 							variant='contained'
 							component='label'
 							onClick={handleUpload}
-							disabled={!selectedImage}
 						>
 							Save Changes
 						</Button>
@@ -206,13 +165,7 @@ export const Settings = () => {
 							margin='normal'
 							{...register('bio')}
 						/>
-						<TextField
-							fullWidth
-							label='Phone'
-							name='phone'
-							margin='normal'
-							{...register('phone')}
-						/>
+						<TextField fullWidth label='Phone' name='phone' margin='normal' />
 						<TextField
 							fullWidth
 							label='Address'
@@ -231,3 +184,48 @@ export const Settings = () => {
 		</Container>
 	)
 }
+
+// import React, { useState } from 'react'
+// import axios from 'axios'
+// import { useSelector } from 'react-redux'
+// import Cookies from 'js-cookie'
+
+// export const Settings = () => {
+// 	const [selectedImage, setSelectedImage] = useState(null)
+
+// 	const handleImageChange = event => {
+// 		setSelectedImage(event.target.files[0])
+// 	}
+// 	const token = useSelector(state => state.users.token)
+
+// 	const handleUpload = async () => {
+// 		const formData = new FormData()
+// 		formData.append('image', selectedImage)
+
+// 		try {
+// 			const response = await axios.post(
+// 				'http://127.0.0.1:8000/users/update_user_profile',
+
+// 				formData,
+// 				{
+// 					headers: {
+// 						'Content-Type': 'multipart/form-data',
+// 						'X-CSRFToken': Cookies.get('csrftoken'),
+// 						Authorization: `Token ${token}`,
+// 					},
+// 					withCredentials: true,
+// 				}
+// 			)
+// 			console.log('Image uploaded successfully', response.data)
+// 		} catch (error) {
+// 			console.error('Error uploading image', error)
+// 		}
+// 	}
+
+// 	return (
+// 		<div style={{ paddingTop: '20vh' }}>
+// 			<input type='file' onChange={handleImageChange} />
+// 			<button onClick={handleUpload}>Upload Image</button>
+// 		</div>
+// 	)
+// }
