@@ -7,6 +7,7 @@ import styles from './style.module.css'
 import { useDispatch } from 'react-redux'
 import { UserActions } from '../../redux/slice/UserSlice'
 import { userService } from '../../services/userService'
+import { setStorage } from '../../localStorage/storage'
 
 // function checkStartingLetters(words, letters) {
 // 	if (letters === '') {
@@ -24,27 +25,14 @@ import { userService } from '../../services/userService'
 export const Login = () => {
 	const { register, handleSubmit } = useForm()
 
-	// let redirect = useNavigate()
+	const redirect = useNavigate()
 	const dispatch = useDispatch()
 
 	const onSubmit = async data => {
-		console.log(data)
-		const response = dispatch(UserActions.login(data))
-		console.log(response)
-		// if (response.data?.response || response.data?.SUCCESS) {
-		// 	localStorage.setItem(
-		// 		'User',
-		// 		JSON.stringify({
-		// 			user: response.data.user,
-		// 			token: response.data.token,
-		// 		})
-		// 	)
-		// dispatch(UserActions.setToken(response.data.token))
-		// dispatch(UserActions.setUser(response.data.user))
-		// 	if (response?.data.SUCCESS) {
-		// 		return redirect('/')
-		// 	}
-		// }
+		const response = await dispatch(UserActions.login(data))
+		if (response.payload.response) {
+			return redirect('/')
+		}
 	}
 
 	return (

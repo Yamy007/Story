@@ -11,28 +11,25 @@ import { Login } from './components/Users/Login'
 import { Register } from './components/Users/Register'
 import { Settings } from './components/Home/Settings'
 import { useDispatch, useSelector } from 'react-redux'
+import { userService } from './services/userService'
+import { Button } from '@mui/material'
+import { UserActions } from './redux/slice/UserSlice'
+import { Logout } from './components/Users/Logout'
+import { innitToken } from './services/csrfService'
+import { getStorage } from './localStorage/storage'
 
 function App() {
-	// console.log(UserApi())
 	const [isDark, setIsDark] = useState(true)
 	const [save, onSave] = useState(false)
-	const dispatch = useDispatch()
-	// useEffect(() => {
-	// 	const user = JSON.parse(localStorage.getItem('User'))
-	// 	if (user) {
-	// 		dispatch(UserActions.setUser(user.user))
-	// 		dispatch(UserActions.setToken(user.token))
-	// 	}
-	// }, [dispatch])
-
+	console.log(getStorage())
 	return (
 		<ThemeProvider theme={isDark ? darkTheme : lightTheme}>
-			{/* <Header
+			<Header
 				isDark={isDark}
 				setIsDark={setIsDark}
 				save={save}
 				onSave={onSave}
-			/> */}
+			/>
 
 			<Routes>
 				<Route
@@ -43,20 +40,14 @@ function App() {
 					path='/story'
 					element={<Storys isDark={isDark} setIsDark={setIsDark} />}
 				></Route>
-				{/* <Route
-					path='/story/:id'
-					element={<StoryInfo isDark={isDark} />}
-				></Route> */}
 
-				<Route
-					path='/user/login'
-					element={<Login isDark={isDark} onSave={onSave} />}
-				></Route>
-
+				<Route path='/user/login' element={<Login isDark={isDark} />}></Route>
 				<Route
 					path='/user/register'
-					element={<Register isDark={isDark} onSave={onSave} />}
+					element={<Register isDark={isDark} />}
 				></Route>
+				<Route path='/user/logout' element={<Logout isDark={isDark} />}></Route>
+
 				<Route
 					path='/user/settings'
 					element={<Settings isDark={isDark} onSave={onSave} />}
