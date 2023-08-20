@@ -13,5 +13,6 @@ urlpatterns = [
     path("mark_as_read", MarkAsRead.as_view()),
     
     path("plug_URL", PlugFunc.as_view()),
+    path("test", FuncForTesting.as_view()),
     
 ]

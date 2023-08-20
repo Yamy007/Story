@@ -135,11 +135,7 @@ REST_FRAMEWORD = {
         'rest_framework.permissions.IsAdminUser',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
-        
-        
+        'rest_framework.authentication.TokenAuthentication',    
     ],
     
 }
@@ -168,6 +164,7 @@ MEDIA_ROOT= os.path.join(BASE_DIR,"media/")
 
 CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_AGE = 60 * 60 * 4
 # CSRF_COOKIE_HTTPONLY = False  # False since we will grab it via universal-cookies
 # SESSION_COOKIE_HTTPONLY = False
 

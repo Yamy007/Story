@@ -75,7 +75,6 @@ class SignUpView(APIView):
                 
                 user = User.objects.create_user(username=username, password=password, email=email)
                 user.save()
-                token = Token.objects.create(user=user)
                 upd_user_status = User.objects.get(pk=user.id)
                 
                 if superuser_secret_word == "isjxynasygaszgnxiasnuiqweruqiwe120942190142osidjadskamf":
@@ -146,7 +145,6 @@ class LoginView(APIView):
             notifications_by_comments = [comment for user_story in user_stories for comment in user_story.comments.all()  if comment.replied_to == 0 and comment.read_by_user == False and comment.creator != get_profile.user.id]
             user_comments = Comments.objects.filter(creator=get_profile.user.id)
             notifications_by_replies = Comments.objects.filter(replied_to__in = [user_comment.id for user_comment in user_comments if user_comment.creator != get_profile.user.id], read_by_user = False).count()
-            token = Token.objects.get(user=user)
             user_data = {
                 "response":True,
                 "message":'user logged in',
@@ -154,7 +152,7 @@ class LoginView(APIView):
                 "user_notifications": len(notifications_by_comments) + notifications_by_replies,
             }
             final_resp = JsonResponse(user_data)
-            final_resp.set_cookie(key='token', value=token.key, max_age=3600)
+            final_resp.set_cookie(key='token', value=user.auth_token.key, max_age=60 * 60 * 4)
             return final_resp
         else:
             return JsonResponse({'response': False, "message":"User does not exist"})

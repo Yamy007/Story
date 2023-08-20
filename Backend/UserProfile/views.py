@@ -229,7 +229,7 @@ class GetUser_MadeComments(APIView):
     def get(self, request, format=None):
         user = self.request.user.id
         com_page = request.GET.get('page', 1)
-        comments = Comments.objects.filter(creator = user)
+        comments = Comments.objects.filter(creator = user).order_by('-datetime')
         paginated = Paginator(comments, per_page=10)
         page_obj = paginated.get_page(com_page)
         if paginated.count == 0:

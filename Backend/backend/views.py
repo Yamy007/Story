@@ -414,8 +414,9 @@ class MarkAsRead(APIView):
         return JsonResponse({'response':True, "message":f'comment id={comment} was marked as read'}) 
 
   
-class PlugFunc(APIView):     
-    permission_classes = (permissions.AllowAny,)
+class PlugFunc(APIView):
+    authentication_classes = [ TokenAuthentication ]     
+    permission_classes = [ permissions.IsAuthenticated ]
     
     def get(self, request, format=None):
         genres = ["Life", "Horror", "Adventure", "Sad"]
@@ -428,3 +429,14 @@ class PlugFunc(APIView):
                 dbObject = Story(creator_id = request.user.id, title=f"Test Story{i+1}{j+1}", story_body=f"Testing story body{j+1}{i+1}")
                 dbObject.save()
                 dbObject.genres.add(Genre.objects.all()[i])
+
+        return JsonResponse({'response':'success'})
+    
+
+class FuncForTesting(APIView):
+    authentication_classes = [ TokenAuthentication ]
+    #permission_classes = [ permissions.IsAuthenticated ]
+    
+    def get(self, request):
+        print(request.auth)
+        return JsonResponse({'response':'success'})
