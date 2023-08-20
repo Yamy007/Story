@@ -2,11 +2,12 @@ import React from 'react'
 import { Box, Pagination } from '@mui/material'
 import { Story } from '../Story/Story'
 import styles from './Style/Style.module.css'
-import { useSelector } from 'react-redux'
-export const Container = ({ setPage, isDark }) => {
-	const AllPage = useSelector(state => state.posts.page.number_of_pages)
-	let CurrentPage = useSelector(state => state.posts.page.current)
-
+import { useDispatch, useSelector } from 'react-redux'
+import { storyActions } from '../../redux/slice/StorySlice'
+export const Container = ({ isDark }) => {
+	const { number_of_pages } = useSelector(state => state.story.page) || {}
+	let { current } = useSelector(state => state.story.page) || {}
+	const dispatch = useDispatch()
 	return (
 		<Box
 			className={styles.container}
@@ -20,11 +21,9 @@ export const Container = ({ setPage, isDark }) => {
 				<Pagination
 					variant='outlined'
 					color='secondary'
-					count={AllPage}
-					page={CurrentPage}
-					onChange={(e, newPage) => {
-						setPage(newPage)
-					}}
+					count={number_of_pages}
+					page={current}
+					onChange={(e, newPage) => dispatch(storyActions.allStory(newPage))}
 				/>
 			</Box>
 		</Box>

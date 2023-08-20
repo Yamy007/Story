@@ -30,7 +30,7 @@ export const Story = ({ isDark }) => {
 			})
 	}
 
-	const story = useSelector(state => state.posts.data)
+	const story = useSelector(state => state.story.data)
 	return (
 		<>
 			{story?.map((elem, index) => (
