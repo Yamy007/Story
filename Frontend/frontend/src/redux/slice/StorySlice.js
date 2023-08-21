@@ -6,7 +6,6 @@ import {
 	isRejected,
 } from '@reduxjs/toolkit'
 import { storyService } from '../../services/storyService'
-import { useDispatch } from 'react-redux'
 
 const initialState = {
 	data: [],
@@ -18,6 +17,7 @@ const initialState = {
 		number_of_stories: 0,
 	},
 	message: '',
+	likes: [],
 }
 
 const allStory = createAsyncThunk(
@@ -26,6 +26,18 @@ const allStory = createAsyncThunk(
 		try {
 			const { data } = await storyService.getStory(page)
 			return data
+		} catch (err) {
+			return thunkAPI.rejectWithValue(err.response.data)
+		}
+	}
+)
+
+const addLike = createAsyncThunk(
+	'storySlice/addLike',
+	async ({ id, page }, thunkAPI) => {
+		try {
+			await storyService.addLike(id)
+			thunkAPI.dispatch(allStory(page))
 		} catch (err) {
 			return thunkAPI.rejectWithValue(err.response.data)
 		}
@@ -44,6 +56,16 @@ const getStory = createAsyncThunk(
 	}
 )
 
+const getUserLike = createAsyncThunk(
+	'storySlice/getUser/like',
+	async (_, thunkAPI) => {
+		try {
+		} catch (err) {
+			return thunkAPI.rejectWithValue(err.response.data)
+		}
+	}
+)
+
 export const StorySlice = createSlice({
 	name: 'storySlice',
 	initialState,
@@ -51,12 +73,20 @@ export const StorySlice = createSlice({
 	extraReducers: builder =>
 		builder
 			.addCase(allStory.fulfilled, (state, actions) => {
-				state.data = actions.payload.data
-				state.page = actions.payload.page
-				state.message = actions.payload.message
+				return {
+					...state,
+					data: actions.payload.data,
+					page: actions.payload.page,
+					message: actions.payload.message,
+				}
 			})
 			.addCase(getStory.fulfilled, (state, actions) => {
 				state.data = actions.payload
+			})
+			.addCase(addLike.fulfilled, (state, actions) => {
+				return {
+					...state,
+				}
 			}),
 })
 
@@ -65,6 +95,7 @@ const { reducer: storyReducer, actions } = StorySlice
 const storyActions = {
 	allStory,
 	getStory,
+	addLike,
 }
 
 export { storyReducer, storyActions }

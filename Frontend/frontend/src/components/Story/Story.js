@@ -15,24 +15,31 @@ import { Button, Box } from '@mui/material'
 import { Link } from 'react-router-dom'
 import clipboardCopy from 'clipboard-copy'
 import { Color } from '../ColorGenre/Color'
-import { useSelector } from 'react-redux'
-export const Story = ({ isDark }) => {
-	const data = Color(isDark)
-
+import { useDispatch, useSelector } from 'react-redux'
+import { NotificationDisplay } from '../Notification/Notification'
+import { storyActions } from '../../redux/slice/StorySlice'
+export const Story = () => {
+	// const data = Color()
+	const theme = useSelector(state => state.theme.theme)
+	const dispatch = useDispatch()
 	const handleCopyToClipboard = id => {
 		const textToCopy = window.location.href + '/' + id
 		clipboardCopy(textToCopy)
 			.then(() => {
-				alert('Success!')
+				NotificationDisplay.showNotification('success', 'success text copied')
 			})
 			.catch(error => {
-				console.error('Помилка копіювання у буфер обміну:', error)
+				NotificationDisplay.showNotification('error', 'upc....')
 			})
 	}
-
+	// React.useEffect(() => {}, [dispatch])
+	const page = useSelector(state => state.story.page.current)
 	const story = useSelector(state => state.story.data)
+	const allGenre = useSelector(state => state.genre.genre)
+	console.log(story)
 	return (
 		<>
+			<NotificationDisplay />
 			{story?.map((elem, index) => (
 				<Card
 					key={index}
@@ -55,21 +62,29 @@ export const Story = ({ isDark }) => {
 							action={
 								<IconButton
 									aria-label='settings'
-									style={isDark ? { color: '#B8B8B8' } : { color: '#363434' }}
+									sx={
+										theme === 'dark'
+											? { color: '#B8B8B8' }
+											: { color: '#363434' }
+									}
 								>
 									<MoreVertIcon />
 								</IconButton>
 							}
 							title={
 								<span
-									style={isDark ? { color: '#EBEBEB' } : { color: 'green' }}
+									sx={
+										theme === 'dark' ? { color: '#EBEBEB' } : { color: 'green' }
+									}
 								>
 									{elem.title}
 								</span>
 							}
 							subheader={
 								<span
-									style={isDark ? { color: '#B3B3B3' } : { color: 'green' }}
+									sx={
+										theme === 'dark' ? { color: '#B3B3B3' } : { color: 'green' }
+									}
 								>
 									{elem.date}
 								</span>
@@ -77,21 +92,16 @@ export const Story = ({ isDark }) => {
 						/>
 
 						<CardContent>
-							<Typography variant='body2' color={isDark ? '#EFEAEA' : 'green'}>
+							<Typography
+								variant='body2'
+								color={theme === 'dark' ? '#EFEAEA' : 'green'}
+							>
 								{elem.story_body}
 							</Typography>
 							<Typography variant='h5'>
 								{elem.genres?.map((elem, index) => (
-									<Button
-										variant='contained'
-										style={{
-											background: data?.filter(color => color.genre === elem)[0]
-												?.color,
-											margin: '0.3em',
-										}}
-										key={index}
-									>
-										{elem}
+									<Button variant='contained' key={index}>
+										{allGenre?.filter(x => x.id === elem)[0]?.genre}
 									</Button>
 								))}
 							</Typography>
@@ -99,24 +109,33 @@ export const Story = ({ isDark }) => {
 					</Box>
 					<CardActions disableSpacing>
 						<IconButton
-							style={isDark ? { color: '#B8B8B8' } : { color: '#363434' }}
+							sx={
+								theme === 'dark' ? { color: '#B8B8B8' } : { color: '#363434' }
+							}
 							aria-label='add to favorites'
-							onClick={() => console.log('click')}
+							onClick={() =>
+								dispatch(storyActions.addLike({ id: elem.story_id, page }))
+							}
 						>
 							<FavoriteIcon />
 						</IconButton>
 						<Typography
 							variant='body2'
 							component='p'
-							style={isDark ? { color: '#B8B8B8' } : { color: '#363434' }}
+							sx={
+								theme === 'dark' ? { color: '#B8B8B8' } : { color: '#363434' }
+							}
 						>
 							Likes: {elem.likes}
 						</Typography>
 						<IconButton
+							onClick={() => handleCopyToClipboard(elem.story_id)}
 							aria-label='share'
-							style={isDark ? { color: '#B8B8B8' } : { color: '#363434' }}
+							sx={
+								theme === 'dark' ? { color: '#B8B8B8' } : { color: '#363434' }
+							}
 						>
-							<ShareIcon onClick={() => handleCopyToClipboard(elem.story_id)} />
+							<ShareIcon />
 						</IconButton>
 						<Link to={`/story/${elem.story_id}`}>
 							<Button

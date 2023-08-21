@@ -10,8 +10,8 @@ export const ThemeSlice = createSlice({
 	initialState: getStorage('Theme') || innitValue,
 	reducers: {
 		setTheme: (state, actions) => {
-			const data = { ...state, theme: actions.payload }
-			setStorage('Theme', { theme: data })
+			const data = { ...state, theme: actions.payload.theme }
+			setStorage('Theme', data)
 			return data
 		},
 	},

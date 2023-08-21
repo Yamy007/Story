@@ -20,7 +20,6 @@ import { getStorage } from './localStorage/storage'
 import { theme } from './constants/theme'
 function App() {
 	const isActiveTheme = useSelector(state => state.theme.theme)
-	console.log('is', isActiveTheme)
 	const [isDark, setIsDark] = useState(true)
 	const [save, onSave] = useState(false)
 	return (
