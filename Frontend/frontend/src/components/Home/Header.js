@@ -19,13 +19,15 @@ import { useDispatch, useSelector } from 'react-redux'
 import { avatar } from '../../constants/image.urls'
 import { page, setings_login, setings_logout } from '../../constants/heder'
 import { navigateHeader } from '../Navigate/Navigate'
+import { baseURL } from '../../constants/urls'
 
 export const Header = ({ isDark, setIsDark, save, onSave }) => {
 	let redirect = useNavigate()
 
 	//user_info
 	let isAutofication = useSelector(state => state.user.isAutofication)
-	const photoProfile = useSelector(state => state.user.user.image) || avatar
+	const image = useSelector(state => state.user.user.image)
+	const photoProfile = image ? baseURL + image : avatar
 	const username = useSelector(state => state.user.user.username)
 
 	//settings
@@ -63,7 +65,7 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 							textDecoration: 'none',
 						}}
 					>
-						Yamy
+						Yamy & BabyGrim
 					</Typography>
 
 					<Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -97,7 +99,12 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 						>
 							{pages.map(page => (
 								<MenuItem key={page} onClick={() => setAnchorElNav(null)}>
-									<Typography textAlign='center'>{page}</Typography>
+									<Link
+										to={page === 'Home' ? '/' : page}
+										style={{ textDecoration: 'none' }}
+									>
+										<Button color='warning'>{page}</Button>
+									</Link>
 								</MenuItem>
 							))}
 						</Menu>
@@ -118,7 +125,7 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 							textDecoration: 'none',
 						}}
 					>
-						Yamy
+						Yamy & BabyGrim
 					</Typography>
 					<Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
 						{pages.map(page => (
