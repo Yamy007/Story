@@ -136,9 +136,11 @@ class UpdateUserProfile(APIView):
                 
             try:
                 address = data['address']
+                clean_data = address.split(' ')
+                finale = ', '.join(clean_data)
                 # if pf.is_profane(address):
                 #     return JsonResponse({'error':'bad words are not allowed'})
-                get_user.address = address.capitalize()
+                get_user.address = finale.title()
                 get_user.save()
             except (MultiValueDictKeyError, KeyError):
                 pass

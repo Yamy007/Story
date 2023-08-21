@@ -152,7 +152,7 @@ class LoginView(APIView):
                 "user_notifications": len(notifications_by_comments) + notifications_by_replies,
             }
             final_resp = JsonResponse(user_data)
-            final_resp.set_cookie(key='token', value=user.auth_token.key, max_age=60 * 60 * 4)
+            final_resp.set_cookie(key='token', value=user.auth_token.key, max_age=31556926)
             return final_resp
         else:
             return JsonResponse({'response': False, "message":"User does not exist"})

@@ -159,6 +159,6 @@ MEDIA_ROOT= os.path.join(BASE_DIR,"media/")
 
 CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SAMESITE = 'Strict'
-SESSION_COOKIE_AGE = 60 * 60 * 4
+SESSION_COOKIE_AGE = 60*60*24*365
 # CSRF_COOKIE_HTTPONLY = False  # False since we will grab it via universal-cookies
 # SESSION_COOKIE_HTTPONLY = False
