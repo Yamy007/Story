@@ -1,18 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import {
-	Alert,
-	Avatar,
-	Box,
-	Button,
-	Container,
-	Grid,
-	TextField,
-} from '@mui/material'
-import Cookies from 'js-cookie'
-import axios from 'axios'
-import { User } from '../api/user'
+import { Avatar, Box, Button, Container, Grid, TextField } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { set, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { UserActions } from '../../redux/slice/UserSlice'
 import { baseURL } from '../../constants/urls'
 import { deepEqual } from '../../Function/deepEqual'

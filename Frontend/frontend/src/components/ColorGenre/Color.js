@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { api } from '../api/api'
+// import { api } from '../api/api'
 
 function getRandomBrightColor(isDark) {
 	// Генеруємо три випадкових числа в діапазоні від 0 до 255 для R, G та B компонентів
@@ -27,7 +27,7 @@ export const Color = isDark => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await api.get('get_all_genres')
+				const response = "await api.get('get_all_genres')"
 				setGenre(
 					response.data.map(genre => ({
 						...genre,

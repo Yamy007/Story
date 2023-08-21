@@ -1,7 +1,6 @@
 import { Box, Button, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { User } from '../api/user'
 import { useNavigate } from 'react-router-dom'
 import styles from './style.module.css'
 import { useDispatch } from 'react-redux'

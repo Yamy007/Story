@@ -3,7 +3,7 @@ export const setStorage = (key, user) => {
 }
 
 export const getStorage = key => {
-	return JSON.parse(localStorage.getItem('User'))
+	return JSON.parse(localStorage.getItem(key))
 }
 
 export const clearStorage = key => {
