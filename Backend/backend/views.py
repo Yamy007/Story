@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.authentication import TokenAuthentication
 
+
 def get_genre_for_Yaroslav(request):
     all_genres = Genre.objects.all()
     return JsonResponse([genre.serialize() for genre in all_genres], safe=False)

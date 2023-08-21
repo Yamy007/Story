@@ -18,7 +18,7 @@ import string
 from django.contrib.auth.hashers import check_password
 from django.core.mail import send_mail
 from django.conf import settings
-# from profanity_filter import ProfanityFilter
+from better_profanity import profanity
 
 
 class CheckAuthenticationStatus(APIView):
@@ -70,8 +70,8 @@ class SignUpView(APIView):
                     return JsonResponse({'response': False, "message":'Password cannot be numerical'})
                 if any(symbol in username for symbol in set(punctuation)):
                     return JsonResponse({'response': False, "message":'Username cannot contain special symbols'})
-                # if pf.is_profane(username):
-                #     return JsonResponse({'response':'username cannot contain bad words'})
+                if profanity.contains_profanity(username):
+                    return JsonResponse({'response': False, "message":'Username cannot contain obscene expressions'})
                 
                 user = User.objects.create_user(username=username, password=password, email=email)
                 user.save()

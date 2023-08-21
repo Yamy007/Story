@@ -10,9 +10,9 @@ from django.core.paginator import Paginator
 from django.utils.datastructures import MultiValueDictKeyError
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
-#from profanity_filter import ProfanityFilter
 from rest_framework.authentication import TokenAuthentication
 import os
+from better_profanity import profanity
 
 class GetUserProfilesView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -39,12 +39,10 @@ class UpdateUserProfile(APIView):
     authentication_classes = [ TokenAuthentication ]
     permission_classes = (permissions.IsAuthenticated,)
     
-    
     #@method_decorator(csrf_protect) 
     def post(self, request, format=None):
-        # pf = ProfanityFilter()
-        # pf.censor_whole_words = False
-        # pf.censor_char = '*'
+        errors = {}
+        
         data = self.request.data
         user_id = self.request.user.id
         try:
@@ -55,7 +53,7 @@ class UpdateUserProfile(APIView):
         if get_user is not None:
             try:
                 thumbnail = request.FILES['image']
-                if thumbnail.name.endswith(('.jpg', '.png', '.jpeg')):
+                if thumbnail.name.endswith(('.jpg', '.png', '.jpeg', '.gif')):
                     if get_user.image:
                         try:
                             os.remove(get_user.image.path)
@@ -67,8 +65,7 @@ class UpdateUserProfile(APIView):
                         get_user.image = thumbnail
                         get_user.save()
                 else:
-                    return JsonResponse({'response':False, "message":"Wrong input data (only '.jpg', '.png', '.jpeg' are allowed)"})
-                
+                    errors["image"] = "Wrong image data (only '.jpg', '.png', '.jpeg' '.gif' are allowed)"
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
@@ -76,12 +73,23 @@ class UpdateUserProfile(APIView):
             
             try:
                 first_name = data['first_name']
-                if any(symbol in first_name for symbol in set(punctuation)) or " " in first_name:
-                    return JsonResponse({'response':False, "message":'First name cannot contain special symbols'})
-                # if pf.is_profane(first_name):
-                #     return JsonResponse({'error':'bad words are not allowed'})
-                get_user.first_name = first_name.capitalize()
-                get_user.save()
+                if profanity.contains_profanity(first_name):
+                    errors["first_name"] = "First name cannon contain obscene expressions"
+                else:
+                    if "-" in first_name:
+                        if any(symbol in word for word in first_name.split('-') for symbol in set(punctuation)):
+                            errors["first_name"] = 'First name cannot contain special symbols'
+                        else:
+                            clean_data = "-".join(w.capitalize() for w in first_name.split('-'))
+                            get_user.first_name = clean_data
+                            get_user.save()
+                    else:
+                        if any(symbol in first_name for symbol in set(punctuation)):
+                            errors["first_name"] = 'First name cannot contain special symbols'
+                        else:
+                            clean_data = " ".join(w.capitalize() for w in first_name.split())
+                            get_user.first_name = clean_data
+                            get_user.save()  
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
@@ -90,12 +98,23 @@ class UpdateUserProfile(APIView):
                 
             try:
                 last_name = data['last_name']
-                if any(symbol in last_name for symbol in set(punctuation)) or " " in last_name:
-                    return JsonResponse({'response':False, "message":'Last name cannot contain special symbols'})
-                # if pf.is_profane(last_name):
-                #     return JsonResponse({'error':'bad words are not allowed'})
-                get_user.last_name = last_name.capitalize()
-                get_user.save()
+                if profanity.contains_profanity(last_name):
+                    errors["last_name"] = "Last name cannon contain obscene expressions"
+                else:
+                    if "-" in last_name:
+                        if any(symbol in word for word in last_name.split('-') for symbol in set(punctuation)):
+                            errors["last_name"] = 'Last name cannot contain special symbols'
+                        else:
+                            clean_data = "-".join(w.capitalize() for w in last_name.split('-'))
+                            get_user.last_name = clean_data
+                            get_user.save()
+                    else:
+                        if any(symbol in last_name for symbol in set(punctuation)):
+                            errors["last_name"] = 'Last name cannot contain special symbols'
+                        else:
+                            clean_data = " ".join(w.capitalize() for w in last_name.split())
+                            get_user.last_name = clean_data
+                            get_user.save()
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
@@ -107,12 +126,12 @@ class UpdateUserProfile(APIView):
                 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
                 if re.fullmatch(regex, email):
                     if User.objects.filter(~Q(pk = get_user.id ), email = email).exists():
-                        return JsonResponse({'response':False, "message":'Email is already in use'}) 
+                        errors["email"] = "Email is already in use"
                     else:
                         get_user.email = email
                         get_user.save()
                 else:
-                    return JsonResponse({'response': False, "message":'Invalid email syntax'})
+                    errors["email"] = "Invalid email syntax"
                     
             except (MultiValueDictKeyError, KeyError):
                 pass
@@ -122,12 +141,27 @@ class UpdateUserProfile(APIView):
                 
             try:
                 phone = data['phone']
-                clean_phone = re.sub("[-/()!?]","", phone)
-                if clean_phone[1:].isnumeric():
-                    get_user.phone = clean_phone
+                clean_phone = re.sub("[+-/()!?]","", phone)  
+                if len(clean_phone) == 10:
+                    if clean_phone.isnumeric():
+                        get_user.phone = clean_phone
+                        get_user.save()
+                    else:
+                        errors['phone'] = 'Only numbers are allowed in phone number'    
+                         
+                elif len(clean_phone) == 12:
+                    if clean_phone.isnumeric():
+                        get_user.phone = "+" + clean_phone
+                        get_user.save()
+                    else:
+                        errors['phone'] = 'Only numbers are allowed in phone number'
+                elif len(clean_phone) == 0:
+                    get_user.phone = ""
                     get_user.save()
                 else:
-                    return JsonResponse({'response': False, "message":'Invalid phone syntax'})
+                    errors['phone'] = 'Invalid phone number'
+                    
+                
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
@@ -136,12 +170,12 @@ class UpdateUserProfile(APIView):
                 
             try:
                 address = data['address']
-                clean_data = address.split(' ')
-                finale = ', '.join(clean_data)
-                # if pf.is_profane(address):
-                #     return JsonResponse({'error':'bad words are not allowed'})
-                get_user.address = finale.title()
-                get_user.save()
+                clean_data = " ".join(w.capitalize() for w in address.split())
+                if profanity.contains_profanity(clean_data):
+                    errors["address"] = "Address cannot contain obscene expressions"
+                else:
+                    get_user.address = clean_data
+                    get_user.save()
             except (MultiValueDictKeyError, KeyError):
                 pass
             except:
@@ -150,8 +184,7 @@ class UpdateUserProfile(APIView):
                 
             try:
                 bio = data['bio']
-                # get_user.bio = pf.censor(bio)
-                get_user.bio = bio
+                get_user.bio = profanity.censor(bio)
                 get_user.save()
             except (MultiValueDictKeyError, KeyError):
                 pass
@@ -160,7 +193,11 @@ class UpdateUserProfile(APIView):
         else:
             return JsonResponse({'response': False, "message":"користувача не існує"})
         
-        return JsonResponse({'response':True, "message":"User profile updated successfully", "data": UserProfileSerializer(get_user).data})
+        if errors:
+            resp = "User profile updated successfully but with errors"
+        else:
+            resp = "User profile updated successfully"
+        return JsonResponse({'response':True, "message":resp, "invalidated":errors, "data": UserProfileSerializer(get_user).data})
         
             
             
@@ -259,9 +296,6 @@ class CreateOrUpdateUserStory(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
     def post(self, request, format=None):
-        # pf = ProfanityFilter()
-        # pf.censor_whole_words = False
-        # pf.censor_char = '*'
         user = self.request.user.id
         data = self.request.data
         try:
@@ -285,24 +319,21 @@ class CreateOrUpdateUserStory(APIView):
             to_update = data['update']
             story = Story.objects.get(pk = to_update)
             if story.creator_id == user:
-                story.story_body = story_body
+                story.story_body = profanity.censor(story_body)
                 get_genres = Genre.objects.filter(pk__in = clean_genres_data)
                 for genre in get_genres:
                     story.genres.add(genre.id)
                     story.save()
-                story.title = story_title + " (Edit)"
+                story.title = profanity.censor(story_title) + " (Edit)"
                 story.save()
                 return JsonResponse({'response':True, "message":"історію успішно оновлено/редаговано"})
             else:
                 return JsonResponse({'response':False, "message":"не той користувач"})
         except:
             pass
-        # story_title = pf.censor(story_title)
-        # story_body = pf.censor(story_body)
-        # story_genres_ids = story_genres_ids.split(',')
         
         #creating story
-        user_story = Story(creator_id = user, title = story_title, story_body = story_body)
+        user_story = Story(creator_id = user, title = profanity.censro(story_title), story_body = profanity.censor(story_body))
         user_story.save()
         get_genres = Genre.objects.filter(pk__in = clean_genres_data)
         for genre in get_genres:
@@ -403,7 +434,7 @@ class CommentStoryOrReplyToCommentOrEditComment(APIView):
             
             if to_edit.creator != user:
                 return JsonResponse({'response':False, "message":"не той користувач"})
-            to_edit.comment_body += "\n\n(Edit): " + comment_body
+            to_edit.comment_body += "\n\n(Edit): " + profanity.censor(comment_body)
             to_edit.save()
             return JsonResponse({"response":True, "message":"Comment edited succesfully"})
         
@@ -411,8 +442,6 @@ class CommentStoryOrReplyToCommentOrEditComment(APIView):
             story_id = data['story']
         except:
             return JsonResponse({'response':False, "message":"відсутній ключ story у запиті"})
-        
-        
         
         try:
             reply = data['reply']
@@ -439,13 +468,13 @@ class CommentStoryOrReplyToCommentOrEditComment(APIView):
                 if len([comm for comm in story.comments.all() if comm.replied_to != 0 and comm.creator == user]) == 5:
                     return JsonResponse({'response':False, "message":"Reply was not added - only 5 replies per post available"})
                 else:
-                    create_comment = Comments(creator = user, comment_body=comment_body, replied_to = reply)
+                    create_comment = Comments(creator = user, comment_body=profanity.censor(comment_body), replied_to = reply)
                     
             else:
                 if len([comm for comm in story.comments.all() if comm.replied_to == 0 and comm.creator == user]) == 5:
                     return JsonResponse({'response':False, "message":"Comment was not added - only 5 comments per post available "})
                 else:
-                    create_comment = Comments(creator = user, comment_body=comment_body)
+                    create_comment = Comments(creator = user, comment_body=profanity.censor(comment_body))
                 
             create_comment.save()
             story.comments.add(create_comment)
