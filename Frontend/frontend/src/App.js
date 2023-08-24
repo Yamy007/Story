@@ -17,13 +17,13 @@ import { UserActions } from './redux/slice/UserSlice'
 import { Logout } from './components/Users/Logout'
 import { innitToken } from './services/csrfService'
 import { getStorage } from './localStorage/storage'
-
+import { theme } from './constants/theme'
 function App() {
+	const isActiveTheme = useSelector(state => state.theme.theme)
 	const [isDark, setIsDark] = useState(true)
 	const [save, onSave] = useState(false)
-	console.log(getStorage())
 	return (
-		<ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+		<ThemeProvider theme={theme[isActiveTheme]}>
 			<Header
 				isDark={isDark}
 				setIsDark={setIsDark}

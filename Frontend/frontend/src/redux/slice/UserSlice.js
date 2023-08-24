@@ -91,7 +91,7 @@ const updateProfile = createAsyncThunk(
 
 export const UserSlice = createSlice({
 	name: 'userSlice',
-	initialState: getStorage('User') ? getStorage('User') : initialState,
+	initialState: getStorage('User') || initialState,
 	reducers: {},
 	extraReducers: builder =>
 		builder

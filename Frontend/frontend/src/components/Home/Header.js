@@ -20,12 +20,14 @@ import { avatar } from '../../constants/image.urls'
 import { page, setings_login, setings_logout } from '../../constants/heder'
 import { navigateHeader } from '../Navigate/Navigate'
 import { baseURL } from '../../constants/urls'
+import { setTheme } from '../../redux/slice/ThemeSlice'
 
 export const Header = ({ isDark, setIsDark, save, onSave }) => {
-	let redirect = useNavigate()
-
+	const redirect = useNavigate()
+	const dispatch = useDispatch()
+	const theme = useSelector(state => state.theme.theme)
 	//user_info
-	let isAutofication = useSelector(state => state.user.isAutofication)
+	const isAutofication = useSelector(state => state.user.isAutofication)
 	const image = useSelector(state => state.user.user.image)
 	const photoProfile = image ? baseURL + image : avatar
 	const username = useSelector(state => state.user.user.username)
@@ -147,8 +149,14 @@ export const Header = ({ isDark, setIsDark, save, onSave }) => {
 						control={
 							<Switch
 								color='secondary'
-								checked={isDark}
-								onChange={() => setIsDark(prev => !prev)}
+								checked={theme === 'dark'}
+								onChange={() =>
+									setIsDark(
+										theme === 'dark'
+											? dispatch(setTheme({ theme: 'light' }))
+											: dispatch(setTheme({ theme: 'dark' }))
+									)
+								}
 							/>
 						}
 						label={isDark ? 'Dark' : 'Light'}

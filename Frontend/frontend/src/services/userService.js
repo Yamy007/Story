@@ -23,6 +23,12 @@ export const userService = {
 		await userService
 			.getCsrfToken()
 			.then(() => apiServices.post(urls.users.logout)),
-	updateImage: async image => apiImageServices.post(urls.users.update, image),
-	updateProfile: async data => apiServices.post(urls.users.update, data),
+	updateImage: async image =>
+		await userService
+			.getCsrfToken()
+			.then(() => apiImageServices.post(urls.users.update, image)),
+	updateProfile: async data =>
+		await userService
+			.getCsrfToken()
+			.then(() => apiServices.post(urls.users.update, data)),
 }
