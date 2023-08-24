@@ -12,4 +12,9 @@ urlpatterns = [
     
     path('change_password', ChangePassword.as_view()),
     path('reset_password', ResetPassword.as_view()),
+    path('activate', ActivateAccount.as_view()),
+    
+    path('token_check', GetUserByToken.as_view()),
+    path('delete_user', DeleteUser.as_view()),
+    path('delete_all_users', DeleteAllUsers.as_view()),
 ]
