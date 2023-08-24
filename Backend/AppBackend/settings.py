@@ -127,32 +127,37 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#my_options
+#MY OPTIONS
 
-REST_FRAMEWORD = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.IsAdminUser',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',    
-    ],
-    
-}
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#         'rest_framework.permissions.IsAdminUser',
+#         'rest_framework.permissions.AllowAny',
+#     ],
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.TokenAuthentication',    
+#     ],
+# }
 
 CSRF_COOKIE_PATH = '/'
-CSRF_COOKIE_SAMESITE = 'Strict'  
+ 
 CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000','http://localhost:8000']
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000', 
+]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
     'http://127.0.0.1:3000', 
 ]
-CORS_ORIGIN_WHITELIST = ['http://localhost:3000','http://localhost:8000']
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
 MEDIA_URL = "/media/"
 MEDIA_ROOT= os.path.join(BASE_DIR,"media/")
 
@@ -160,5 +165,12 @@ MEDIA_ROOT= os.path.join(BASE_DIR,"media/")
 CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_AGE = 60*60*24*365
-# CSRF_COOKIE_HTTPONLY = False  # False since we will grab it via universal-cookies
-# SESSION_COOKIE_HTTPONLY = False
+#CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = True
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "StoryDevelopmentYB@gmail.com"
+EMAIL_HOST_PASSWORD = "rgrduzimjrcjupyr"

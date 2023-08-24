@@ -1,0 +1,42 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Activation</title>
+</head>
+<style>
+    button{
+        background-color: #7ed9fd; /* Green */
+        color: black;
+        border: none;
+        padding: 15px 32px;
+        text-align: center;
+        display: inline-block;
+        font-size: 20px;
+        border-radius: 25px;
+    }
+    a{
+        text-decoration: None;
+    }
+    button:hover{
+        cursor: pointer;
+    }
+</style>
+<body style="background-color: aliceblue;">
+    {% if response %}
+        <h1 style="text-align: center; margin-top: 20%;">Thank you, for registering on StoryDevYB!<h1>
+            <h3 style="text-align: center;">{{message}}</h3>
+            <a href="http://localhost:3000/user/login"><button onclick="javascript:close()" style="margin-left: 46%;">Log In</button></a>
+    {% else %}
+        <h1 style="text-align: center; margin-top: 20%;">Something went wrong..<h1> 
+            <h3 style="text-align: center;">{{message}}</h3>
+            <a href="http://localhost:3000/user/register"><button onclick="javascript:close()" style="margin-left: 46%; ">Register</button></a>
+
+    {% endif %}
+    
+    
+</body>
+</html>
