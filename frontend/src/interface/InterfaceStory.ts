@@ -6,7 +6,7 @@ export interface IPages {
 	number_of_items: number
 }
 
-export interface IStory extends IPages {
+export interface IStory {
 	story_id: number
 	creator_user_id: number
 	title: string
@@ -19,7 +19,9 @@ export interface IStory extends IPages {
 	archivation_state: boolean
 }
 
-export interface IResponse extends IStory {
+export interface IResponse {
 	response: boolean
 	message: string
+	page?: IPages
+	data?: IStory[]
 }
