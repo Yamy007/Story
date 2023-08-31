@@ -1,15 +1,18 @@
-import ReactDOM from 'react-dom/client'
-import { RouterProvider } from 'react-router-dom'
-import { router } from './router'
-import { Provider } from 'react-redux'
-import { store } from './redux'
+import ReactDOM from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
+import { router } from "./router";
+import { Provider } from "react-redux";
+import { store } from "./redux";
+
+const root = ReactDOM.createRoot(
+  document.getElementById("root") as HTMLElement,
+);
 root.render(
-	<Provider store={store}>
-		<RouterProvider router={router} />
-	</Provider>
-)
+  <Provider store={store}>
+    <RouterProvider router={router} />
+  </Provider>,
+);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
