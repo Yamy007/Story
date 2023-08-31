@@ -23,3 +23,9 @@
 body {
   margin: 0;
 }
+
+#root {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 10vh minmax(90vh, auto);
+}

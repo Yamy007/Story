@@ -1,19 +1,12 @@
 .LoginComponent {
   padding: 2rem;
-  display: grid;
-  grid-template-columns: auto;
 
   form {
-    max-width: 60vw;
+    width: 100%;
     padding: 2rem;
     display: grid;
-    grid-template-columns: auto;
+    grid-template-columns: minmax(50vw, 90vw);
     justify-content: center;
     gap: 1rem;
   }
-}
-
-.textText {
-  font-family: MonaLisa;
-  color: teal;
 }
