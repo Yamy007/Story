@@ -1,0 +1,25 @@
+@font-face {
+  font-family: "MonaLisa";
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local("MonaLisa"),
+    url(./fonts/MonoLisa-Light.ttf) format("woff2");
+}
+
+@font-face {
+  font-family: "MonaLisa";
+  font-style: normal;
+  font-weight: 500;
+  src:
+    local("MonaLisa"),
+    url(./fonts/MonoLisa-Regular.ttf) format("woff2");
+}
+
+* {
+  font-family: "MonaLisa", sans-serif;
+}
+
+body {
+  margin: 0;
+}
