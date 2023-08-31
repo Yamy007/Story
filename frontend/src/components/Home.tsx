@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useAppDispatch } from '../hooks'
+import { useAppDispatch, useAppSelector } from '../hooks'
 import { storyActions } from '../redux'
 
 export const Home = () => {

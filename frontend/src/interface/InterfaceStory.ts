@@ -14,14 +14,15 @@ export interface IStory {
 	date: string
 	likes: number
 	comments: number
-	genres: number[]
+	genres: number[] | string[]
 	views: number
-	archivation_state: boolean
+	body?: string[]
+	archivation_state?: boolean
 }
 
 export interface IResponse {
 	response: boolean
 	message: string
 	page?: IPages
-	data?: IStory[]
+	data?: IStory[] | IStory
 }

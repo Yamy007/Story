@@ -6,7 +6,14 @@ const idAndPage = (id: number, page: number = 1): string => {
 
 export const urls = {
 	story: {
-		getAllPost: (): string => `get_all_posts`,
+		getAllPost: (
+			views?: boolean,
+			comments?: boolean,
+			likes?: boolean,
+			date?: boolean,
+			genre?: number,
+			search_request?: string
+		): string => `get_all_posts`,
 		getAllGenres: (): string => `get_all_genres`,
 		getStory: (id: number, page: number): string =>
 			`get_story` + idAndPage(id, page),
