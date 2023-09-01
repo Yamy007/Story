@@ -3,6 +3,8 @@ import { Navigate, createBrowserRouter } from "react-router-dom";
 import { MainLayouts } from "./layout";
 import { HomePage, LoginPage, RegisterPage, StoryPage } from "./pages";
 import { cookieService } from "./services";
+import { UserSettingComponent } from "./components";
+import { UserSettingPage } from "./pages/UserSettingPage";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +31,10 @@ export const router = createBrowserRouter([
       {
         path: "register",
         element: <RegisterPage />,
+      },
+      {
+        path: "setting",
+        element: <UserSettingPage />,
       },
     ],
   },
