@@ -1,12 +1,22 @@
 .LoginComponent {
   padding: 2rem;
 
+  p {
+    text-align: center;
+    line-height: 180%;
+  }
+
   form {
     width: 100%;
     padding: 2rem;
     display: grid;
-    grid-template-columns: minmax(50vw, 90vw);
+    grid-template-columns: minmax(30vw, 40vw);
     justify-content: center;
     gap: 1rem;
   }
+}
+
+div.MuiButtonGroup-root {
+  background: #000;
+  justify-content: flex-end;
 }
