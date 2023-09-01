@@ -4,4 +4,11 @@
   background: $main-bg;
   padding: 0.5rem;
   min-height: 10vh;
+
+  .menu {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

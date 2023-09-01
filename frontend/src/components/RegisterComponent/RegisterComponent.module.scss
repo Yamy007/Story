@@ -1,0 +1,17 @@
+.RegisterComponent {
+  padding: 2rem;
+
+  p {
+    text-align: center;
+    line-height: 180%;
+  }
+
+  form {
+    width: 100%;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: minmax(30vw, 40vw);
+    justify-content: center;
+    gap: 1rem;
+  }
+}
