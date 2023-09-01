@@ -1,13 +1,12 @@
 import axios from 'axios'
 import { baseURL } from '../constant/urls'
-import { Cookies } from 'react-cookie'
+import { csrfToken } from './cookieService'
 
-export const apiService = axios.create({
+export const apiUserService = axios.create({
 	baseURL,
 	headers: {
 		'Content-Type': 'application/json',
-
-		// Authorization: 'Token ' + Cookies.get('token'),
+		'X-CSRFToken': csrfToken,
 	},
 	withCredentials: true,
 })

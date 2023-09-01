@@ -1,21 +1,20 @@
-import { FC, PropsWithChildren, useEffect } from 'react'
+import { FC, PropsWithChildren } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { Button, Paper, TextField } from '@mui/material'
 import { IUser } from '../../interface'
-import { userService } from '../../services'
+import { useAppDispatch } from '../../hooks'
+import { userActions } from '../../redux'
 
 export interface RegisterComponentPropsInterface extends PropsWithChildren {}
 
 export const RegisterComponent: FC<RegisterComponentPropsInterface> = () => {
 	const { register, handleSubmit, reset } = useForm()
-	const onSubmit: SubmitHandler<IUser> = (data: IUser) => {}
-	useEffect(() => {
-		userService.cookie()
-		const allCookies: string = document.cookie
-		console.log(
-			allCookies.split(';')?.filter(elem => elem.includes('csrftoken='))
-		)
-	}, [])
+	const dispatch = useAppDispatch()
+	const onSubmit: SubmitHandler<IUser> = (data: IUser) => {
+		dispatch(userActions.register(data))
+		reset()
+	}
+
 	return (
 		<Paper>
 			<form onSubmit={handleSubmit(onSubmit)}>
@@ -35,7 +34,9 @@ export const RegisterComponent: FC<RegisterComponentPropsInterface> = () => {
 					variant='outlined'
 					{...register('re_password')}
 				/>
-				<Button variant='contained'>Sing UP</Button>
+				<Button variant='contained' type='submit'>
+					Sing UP
+				</Button>
 			</form>
 		</Paper>
 	)
