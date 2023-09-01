@@ -20,7 +20,7 @@ export interface IStory {
 	archivation_state?: boolean
 }
 
-export interface IResponse {
+export interface IResponseStory {
 	response: boolean
 	message: string
 	page?: IPages

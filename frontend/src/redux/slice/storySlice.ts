@@ -1,17 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { storyService } from '../../services/storyService'
 import { AxiosError } from 'axios'
-import { IResponse, IStory } from '../../interface/InterfaceStory'
+import { IResponseStory } from '../../interface'
 
-interface IState {
-	data: IResponse
-}
-
-const initialState: IState = {
+const initialState: IResponseStory = {
+	response: null,
+	message: '',
+	page: null,
 	data: null,
 }
 
-const getAll = createAsyncThunk<IResponse, void>(
+const getAll = createAsyncThunk<IResponseStory, void>(
 	'storySlice/getAll',
 	async (_, { rejectWithValue }) => {
 		try {
@@ -30,7 +29,10 @@ const storySlice = createSlice({
 	reducers: {},
 	extraReducers: build =>
 		build.addCase(getAll.fulfilled, (state, actions) => {
-			state.data = actions.payload
+			state.message = actions.payload.message
+			state.response = actions.payload.response
+			state.data = actions.payload.data
+			state.page = actions.payload.page
 		}),
 })
 
