@@ -30,9 +30,7 @@ const storySlice = createSlice({
 	reducers: {},
 	extraReducers: build =>
 		build.addCase(getAll.fulfilled, (state, actions) => {
-			return {
-				...state,
-			}
+			state.data = actions.payload
 		}),
 })
 
