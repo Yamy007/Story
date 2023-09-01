@@ -44,7 +44,7 @@ export const RegisterComponent: FC<RegisterComponentPropsInterface> = () => {
 					{...register('re_password')}
 				/>
 				<ButtonGroup component='div' size='large'>
-					<Button variant='contained' type='submit' disabled={!isValid}>
+					<Button variant='contained' type='submit'>
 						Sign Up
 					</Button>
 					<Button onClick={() => reset()}>Clear</Button>
